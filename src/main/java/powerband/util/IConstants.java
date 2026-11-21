@@ -1,0 +1,247 @@
+package powerband.util;
+
+import java.awt.Color;
+
+/**
+ * Biblioteca de constantes de Power Band. Ningún otro archivo tiene valores quemados.
+ */
+public interface IConstants {
+
+    // ------------------------------------------------------------ SuperCollider / OSC
+    public static final String SC_DEFAULT_HOST = "127.0.0.1";
+    public static final int SC_DEFAULT_PORT = 57110;
+    public static final int SC_PING_TIMEOUT_MS = 1500;
+    public static final int OSC_RECEIVE_BUFFER = 1024;
+    public static final String OSC_STATUS = "/status";
+    public static final String OSC_STATUS_REPLY = "/status.reply";
+    public static final String OSC_SYNTH_NEW = "/s_new";
+    public static final String OSC_NODE_SET = "/n_set";
+    public static final char OSC_TYPE_TAG_START = ',';
+    public static final char OSC_TYPE_INT = 'i';
+    public static final char OSC_TYPE_FLOAT = 'f';
+    public static final char OSC_TYPE_STRING = 's';
+    public static final int OSC_ALIGNMENT = 4;
+    public static final int OSC_ADD_TO_HEAD = 0;
+    public static final int OSC_DEFAULT_GROUP = 1;
+    public static final int OSC_FIRST_NODE_ID = 10000;
+    public static final int OSC_SNEW_FIXED_ARGS = 4;            // defName, nodeId, addAction, target
+    public static final String OSC_GATE = "gate";
+    public static final int OSC_GATE_OFF = 0;
+
+    // ------------------------------------------------------------ Synths (ids guardados en disco)
+    public static final int SYNTH_PIANO_ID = 1;
+    public static final int SYNTH_BASS_ID = 2;
+    public static final int SYNTH_ORGAN_ID = 3;
+    public static final String SYNTH_PIANO_NAME = "classicPiano";
+    public static final String SYNTH_BASS_NAME = "stringBass";
+    public static final String SYNTH_ORGAN_NAME = "organ70s";
+
+    // Parámetros de los SynthDefs (nombres tal cual en myband.sc)
+    public static final String PARAM_NOTE = "note";
+    public static final String PARAM_DUR_MS = "durMs";
+    public static final String PARAM_THIRD = "third";
+    public static final String PARAM_AMP = "amp";
+    public static final String PARAM_FREQ = "freq";
+    public static final String PARAM_R1 = "r1";
+    public static final String PARAM_R2 = "r2";
+    public static final String PARAM_R3 = "r3";
+    public static final String PARAM_A1 = "a1";
+    public static final String PARAM_A2 = "a2";
+    public static final String PARAM_A3 = "a3";
+
+    // Acciones de un comando
+    public static final int ACTION_PLAY = 1;   // nota con duración (one-shot)
+    public static final int ACTION_ON = 2;     // nota sostenida, empieza
+    public static final int ACTION_OFF = 3;    // nota sostenida, termina
+
+    // Piano
+    public static final int PIANO_MAJOR_THIRD = 4;
+    public static final int PIANO_MINOR_THIRD = 3;
+    public static final float PIANO_MAJOR_THRESHOLD = 0.5f;
+    public static final int PIANO_DEFAULT_DUR_MS = 1500;
+    public static final float PIANO_AMP_MIN = 0.1f;
+    public static final float PIANO_AMP_MAX = 0.5f;
+
+    // Bajo
+    public static final int BASS_DEFAULT_DUR_MS = 700;
+    public static final float BASS_AMP_MIN = 0.2f;
+    public static final float BASS_AMP_MAX = 0.8f;
+
+    // Órgano
+    public static final float ORGAN_R1 = 1f;
+    public static final float ORGAN_R2_MIN = 1.5f;
+    public static final float ORGAN_R2_MAX = 4f;
+    public static final float ORGAN_R3_MIN = 2f;
+    public static final float ORGAN_R3_MAX = 6f;
+    public static final float ORGAN_A1 = 1f;
+    public static final float ORGAN_A2_MIN = 0.1f;
+    public static final float ORGAN_A2_MAX = 0.9f;
+    public static final float ORGAN_A3_FACTOR = 0.5f;
+    public static final float ORGAN_AMP_MIN = 0.1f;
+    public static final float ORGAN_AMP_MAX = 0.4f;
+    public static final int ORGAN_DEFAULT_DUR_MS = 800;
+
+    // MIDI
+    public static final int MIDI_A4_NOTE = 69;
+    public static final double MIDI_A4_FREQ = 440.0;
+    public static final double SEMITONES_PER_OCTAVE = 12.0;
+    public static final int NOTES_PER_OCTAVE = 12;
+    public static final int[] MAJOR_SCALE = { 0, 2, 4, 5, 7, 9, 11 };
+
+    // ------------------------------------------------------------ Instrumentos
+    public static final String STATUS_STARTING = "iniciando...";
+    public static final String STATUS_ACTIVE = "activo";
+    public static final String STATUS_STOPPED = "detenido";
+    public static final String STATUS_UNAVAILABLE = "no disponible: ";
+
+    // Joystick (winmm.dll, JOYINFOEX)
+    public static final String JOY_DEVICE_NAME = "Joystick USB";
+    public static final String JOY_LIBRARY = "winmm";
+    public static final String JOY_FUNCTION = "joyGetPosEx";
+    public static final String OS_NAME_PROPERTY = "os.name";
+    public static final String OS_WINDOWS_PREFIX = "windows";
+    public static final int JOY_MAX_DEVICES = 16;
+    public static final int JOY_NO_ERROR = 0;
+    public static final int JOY_RETURN_ALL = 0xFF;
+    public static final int JOYINFOEX_SIZE = 52;
+    public static final int JOYINFOEX_OFFSET_SIZE = 0;
+    public static final int JOYINFOEX_OFFSET_FLAGS = 4;
+    public static final int JOYINFOEX_OFFSET_X = 8;
+    public static final int JOYINFOEX_OFFSET_Y = 12;
+    public static final int JOYINFOEX_OFFSET_Z = 16;
+    public static final int JOYINFOEX_OFFSET_BUTTONS = 32;
+    public static final float JOY_AXIS_MAX = 65535f;
+    public static final int JOY_BUTTON_COUNT = 8;
+    public static final int JOY_BASE_NOTE = 48;
+    public static final int JOY_POLL_MS = 15;
+    public static final float JOY_VELOCITY = 0.8f;
+
+    // Micrófono
+    public static final String MIC_DEVICE_NAME = "Micrófono";
+    public static final float MIC_SAMPLE_RATE = 44100f;
+    public static final int MIC_SAMPLE_BITS = 16;
+    public static final int MIC_CHANNELS = 1;
+    public static final boolean MIC_SIGNED = true;
+    public static final boolean MIC_BIG_ENDIAN = false;
+    public static final int MIC_FRAME_SAMPLES = 2048;
+    public static final int MIC_BYTES_PER_SAMPLE = 2;
+    public static final int MIC_LINE_BUFFER_FRAMES = 2;
+    public static final int BYTE_MASK = 0xFF;
+    public static final int BITS_PER_BYTE = 8;
+    public static final double MIC_SAMPLE_FULL_SCALE = 32768.0;
+    public static final double MIC_ONSET_RMS = 0.06;
+    public static final double MIC_RELEASE_RMS = 0.03;
+    public static final double MIC_RMS_FULL = 0.4;
+    public static final long MIC_COOLDOWN_MS = 150;
+    public static final double PITCH_MIN_FREQ = 50.0;
+    public static final double PITCH_MAX_FREQ = 600.0;
+    public static final double PITCH_MIN_CORRELATION = 0.5;
+    public static final int BASS_MIN_NOTE = 28;
+    public static final int BASS_MAX_NOTE = 52;
+    public static final int BASS_FALLBACK_NOTE = 36;
+
+    // Cámara
+    public static final String CAM_DEVICE_NAME = "Cámara web";
+    public static final int CAM_INDEX = 0;
+    public static final int CAM_SMALL_WIDTH = 80;
+    public static final int CAM_SMALL_HEIGHT = 60;
+    public static final double CAM_PIXEL_DIFF = 30.0;
+    public static final double CAM_MASK_VALUE = 255.0;
+    public static final float CAM_MOTION_THRESHOLD = 0.04f;
+    public static final float CAM_MOTION_GAIN = 4f;
+    public static final long CAM_COOLDOWN_MS = 350;
+    public static final int CAM_POLL_MS = 40;
+    public static final int CAM_BASE_NOTE = 48;
+    public static final int CAM_OCTAVES = 2;
+    public static final float CAM_MAJOR_ZONE = 0.5f;
+    public static final float TIMBRE_ON = 1f;
+    public static final float TIMBRE_OFF = 0f;
+
+    // ------------------------------------------------------------ Archivos
+    public static final String DATA_DIR = "data";
+    public static final String MUSIC_FILE = "recordings.music";
+    public static final String INDEX_FILE = "recordings.index";
+    public static final String LIST_FILE = "recordings.list";
+    public static final String SORT_TAPE_PREFIX = "recordings.index.tape";
+    public static final String[] SORT_TAPES_A = { "A0", "A1" };
+    public static final String[] SORT_TAPES_B = { "B0", "B1" };
+    public static final String FILE_MODE_RW = "rw";
+    public static final String FILE_MODE_R = "r";
+
+    public static final int NAME_LENGTH = 32;                  // caracteres fijos del nombre
+    public static final int MUSIC_RECORD_SIZE = 96;            // bytes por registro en recordings.music
+    public static final int INDEX_RECORD_SIZE = 72;            // 32 chars * 2 bytes + long de 8 bytes
+    public static final byte RECORD_TYPE_HEADER = 'H';
+    public static final byte RECORD_TYPE_COMMAND = 'C';
+    public static final char PADDING_CHAR = '\0';
+    public static final long NOT_FOUND = -1L;
+    public static final int MERGE_TAPES = 2;                   // cintas por lado en el Balanced Merge
+    public static final int FIRST_RUN_LENGTH = 1;
+
+    public static final String NAME_PATTERN = "[\\p{L}0-9 _\\-]+";
+    public static final String LIST_SEPARATOR = "|";
+    public static final String LIST_SEPARATOR_REGEX = "\\|";
+    public static final int LIST_FIELDS = 2;
+    public static final String LIST_DISPLAY_FORMAT = "%s   %s";
+    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+    // ------------------------------------------------------------ Reproducción
+    public static final int PLAYBACK_BUFFER_SIZE = 64;
+    public static final long NANOS_PER_MILLI = 1_000_000L;
+
+    // ------------------------------------------------------------ UI
+    public static final String APP_TITLE = "Power Band - Editor musical";
+    public static final int WINDOW_WIDTH = 820;
+    public static final int WINDOW_HEIGHT = 560;
+    public static final int MONITOR_MAX_LINES = 400;
+    public static final int MONITOR_ROWS = 20;
+    public static final int MONITOR_COLUMNS = 70;
+    public static final Color RECORDING_COLOR = new Color(200, 30, 30);
+    public static final Color IDLE_COLOR = new Color(60, 60, 60);
+    public static final String BTN_RECORD = "● Grabar";
+    public static final String BTN_STOP_RECORD = "■ Terminar grabación";
+    public static final String BTN_LOAD = "Cargar...";
+    public static final String BTN_PLAY = "▶ Play";
+    public static final String BTN_STOP_PLAY = "■ Stop";
+    public static final String LBL_NO_RECORDING = "Ninguna música cargada";
+    public static final String LBL_LOADED = "Cargada: %s (bytes %d a %d, %d comandos)";
+    public static final String LBL_RECORDING = "GRABANDO...";
+    public static final String LBL_PLAYING = "Reproduciendo: %s";
+    public static final String MSG_ASK_NAME = "Nombre de la música grabada:";
+    public static final String MSG_DISCARD = "¿Descartar la grabación?";
+    public static final String MSG_SELECT = "Seleccione una grabación (orden cronológico):";
+    public static final String MSG_EMPTY_LIST = "No hay grabaciones todavía.";
+    public static final String MSG_SC_DOWN = "SuperCollider no responde en %s:%d.\nAbra myband.sc y ejecute ~myband.load;\nEl programa sigue, pero no sonará hasta que el servidor esté arriba.";
+    public static final String MSG_ERROR_TITLE = "Power Band";
+    public static final String MONITOR_LIVE = "LIVE";
+    public static final String MONITOR_PLAYBACK = "PLAY";
+    public static final String MONITOR_FORMAT = "[%s] %6d ms  %-12s %-4s nota=%d dur=%d vel=%.2f t=(%.2f, %.2f, %.2f)";
+    public static final String INSTRUMENT_FORMAT = "%s → %s: %s";
+    public static final String[] ACTION_NAMES = { "", "PLAY", "ON", "OFF" };
+
+    // ------------------------------------------------------------ Mensajes de error
+    public static final String ERR_SC_SEND = "No se pudo enviar el comando a SuperCollider";
+    public static final String ERR_SC_TIMEOUT = "SuperCollider no respondió a /status";
+    public static final String ERR_OSC_TYPE = "Tipo OSC no soportado: ";
+    public static final String ERR_UNKNOWN_SYNTH = "No existe un synth con id ";
+    public static final String ERR_NO_JOYSTICK = "no se encontró ningún joystick conectado";
+    public static final String ERR_JOY_NOT_WINDOWS = "el joystick usa winmm.dll y solo funciona en Windows";
+    public static final String ERR_JOY_READ = "error leyendo el joystick";
+    public static final String ERR_MIC_OPEN = "no se pudo abrir el micrófono";
+    public static final String ERR_CAM_OPEN = "no se pudo abrir la cámara";
+    public static final String ERR_CAM_LIB = "no se pudo cargar OpenCV";
+    public static final String ERR_NAME_EMPTY = "El nombre no puede estar vacío.";
+    public static final String ERR_NAME_LONG = "El nombre puede tener máximo " + NAME_LENGTH + " caracteres.";
+    public static final String ERR_NAME_CHARS = "Use solo letras, números, espacios, guiones y guion bajo.";
+    public static final String ERR_NAME_DUPLICATE = "Ya existe una grabación llamada \"%s\". Escoja otro nombre.";
+    public static final String ERR_NOT_FOUND = "No existe la grabación \"%s\" en el índice.";
+    public static final String ERR_ALREADY_RECORDING = "Ya se está grabando.";
+    public static final String ERR_NOT_RECORDING = "No hay una grabación pendiente.";
+    public static final String ERR_MUSIC_IO = "Error de E/S en recordings.music";
+    public static final String ERR_INDEX_IO = "Error de E/S en recordings.index";
+    public static final String ERR_LIST_IO = "Error de E/S en recordings.list";
+    public static final String ERR_SORT_IO = "Error de E/S durante el Balanced Merge Sort";
+    public static final String ERR_RECORD_SIZE = "El registro excede el tamaño fijo de ";
+    public static final String ERR_RECORD_TYPE = "Tipo de registro inesperado: ";
+    public static final String ERR_NOTHING_LOADED = "Primero cargue una grabación.";
+}

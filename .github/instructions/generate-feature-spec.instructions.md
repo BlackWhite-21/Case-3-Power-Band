@@ -19,7 +19,7 @@ Read `.github/copilot-instructions.md` at the repository root. It holds the tech
 The project is a simple Java application. Specs target Java only (Maven layout, JDK version from the build file). Map the roles like this, and skip the ones the app does not have:
 
 - **frontend** — console, Swing, or JavaFX user interface
-- **backend** — `service`, `model`, and `dto` packages under `src/game`
+- **backend** — `service`, `model`, and `dto` packages under `src/main/java/powerband`
 - **database** — `repository` package, JDBC, or file persistence
 - **testing** — JUnit 5 tests under `src/test/java`
 - **deploy** — build file, jar packaging, and run scripts
@@ -88,6 +88,7 @@ Write for a coding agent. Short bullets. No preamble and no restatement of the r
 - **Inputs / Outputs** — names, types, and where they come from or go. `None` when the layer has none.
 - **Test criteria** — observable pass or fail conditions.
 - **Assets** — contracts, payloads, copy, config keys, or mockups this layer needs. `None` when it needs none.
+- **Diagram** — for frontend, backend, and database files, write a PlantUML diagram in `specs/diagrams/ft-<number>-<slug>.puml` (class diagram for new classes, sequence diagram for flows between objects, activity diagram for algorithms) and paste the same code in **Assets** inside a ```plantuml block. Testing and deploy files only reference it.
 - **Implementation guidelines** — the stack and rules from `.github/copilot-instructions.md` that bind this layer, plus the real source paths to change. Do not paste the instructions file.
 - **Business workflow** — the ordered steps for this layer only.
 

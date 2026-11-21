@@ -24,7 +24,7 @@ For each role, record:
 
 Do not list private methods.
 
-The project is a simple Java application. Scan `src/game` and `src/test/java`, plus the build file (`pom.xml`). Ignore non-Java source.
+The project is a simple Java application. Scan `src/main/java` and `src/test/java`, plus the build file (`pom.xml`). Ignore non-Java source.
 
 ## Write the instructions
 

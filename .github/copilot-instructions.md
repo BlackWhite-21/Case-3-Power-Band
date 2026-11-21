@@ -81,12 +81,18 @@ Esta sección no agrega requisitos nuevos; precisa puntos que la descripción de
 - Se espera que cuente con un ambiente de desarrollo configurado para IA y con la versión resumida de *spec driven development*.
 
 # Copilot project instructions
-Use Java only. Java 26.0.2, Maven project, and Java Swing for the UI. Use JUnit for unit testing. Use GitHub for source control and code repository.
+Use Java only. JDK 22 o superior (el curso usa 26.0.2), Maven project, Java Swing for the UI. Use JUnit 5 for unit testing. Use GitHub for source control and code repository.
 
-The entrypoint (public static void main) stays in src/game/TicMain.java.
-Domain classes stay in src/game/model/.
-Business logic stays in src/game/service/.
+The entrypoint (public static void main) stays in src/main/java/powerband/Main.java.
+Instruments (Bridge abstraction) stay in src/main/java/powerband/instrument/.
+Synth commands (Bridge implementation) stay in src/main/java/powerband/synth/.
+Business logic stays in src/main/java/powerband/service/.
+Binary files, index, Balanced Merge Sort and binary search stay in src/main/java/powerband/repository/.
+Constants stay in src/main/java/powerband/util/IConstants.java (interface, public static final). No hardcoded values.
+Every method parameter starts with p (pName, pNote, pEvent).
 Packages are lowercase; classes are PascalCase; methods and fields are camelCase; constants are UPPER_SNAKE_CASE.
 One public top-level type per file, and the file name matches the type name.
+
+El detalle del stack, los dispositivos y los formatos de archivo está en CLAUDE.md. Los diagramas PlantUML están en specs/diagrams/.
 
 For project-specific execution flow and layer instructions, follow the repository instructions under .github/instructions/.
