@@ -1,0 +1,79 @@
+@startuml ft-1-bridge-synths
+title ft-1 - Comandos de synths (implementor del Bridge) y OSC
+skinparam classAttributeIconSize 0
+hide empty members
+
+abstract class SynthCommand <<Implementor>> {
+  - client : OscClient
+  + {abstract} getSynthId() : int
+  + {abstract} getSynthName() : String
+  + execute(pEvent : SynthEvent)
+  # {abstract} play(pEvent : SynthEvent)
+  # start(pEvent : SynthEvent)
+  # stop(pEvent : SynthEvent)
+  + stopAll()
+  # scale(pValue, pMin, pMax) : float
+  # midiToFreq(pNote) : float
+}
+note right of SynthCommand::execute
+  Método plantilla:
+  ON  -> start()
+  OFF -> stop()
+  PLAY -> play()
+end note
+
+class PianoCommand {
+  # play() : /s_new classicPiano note durMs third amp
+}
+class BassCommand {
+  # play() : /s_new stringBass note durMs amp
+}
+class OrganCommand {
+  - activeNodes : Map<Integer,Integer>
+  - releaser : ScheduledExecutorService
+  # start() : /s_new organ70s freq r1..r3 a1..a3
+  # stop() : /n_set nodeId gate 0
+  # play() : start + apagado programado
+  + stopAll()
+}
+class SynthCommandRegistry {
+  - commands : Map<Integer, SynthCommand>
+  + register(pCommand)
+  + get(pSynthId) : SynthCommand
+  + execute(pEvent)
+  + nameOf(pSynthId) : String
+  + stopAll()
+}
+class OscClient {
+  - transport : IOscTransport
+  - encoder : OscMessageEncoder
+  - nextNodeId : AtomicInteger
+  + ping()
+  + newSynth(pDefName, pControls...) : int
+  + setControl(pNodeId, pName, pValue)
+  - send(pPath, pArgs...) <<synchronized>>
+}
+class OscMessageEncoder {
+  + encode(pPath, pArgs...) : byte[]
+}
+interface IOscTransport {
+  + send(pData : byte[])
+  + receive(pTimeoutMs) : byte[]
+  + close()
+}
+class UdpOscTransport {
+  - socket : DatagramSocket
+}
+class SynthException
+
+SynthCommand <|-- PianoCommand
+SynthCommand <|-- BassCommand
+SynthCommand <|-- OrganCommand
+SynthCommandRegistry o--> SynthCommand
+SynthCommand --> OscClient
+OscClient --> OscMessageEncoder
+OscClient --> IOscTransport
+IOscTransport <|.. UdpOscTransport
+OscClient ..> SynthException : lanza
+
+@enduml

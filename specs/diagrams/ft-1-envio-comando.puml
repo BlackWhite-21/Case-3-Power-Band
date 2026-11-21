@@ -1,0 +1,19 @@
+@startuml ft-1-envio-comando
+title ft-1 - Envío de un comando a SuperCollider
+participant ":PianoCommand" as P
+participant ":OscClient" as C
+participant ":OscMessageEncoder" as E
+participant ":UdpOscTransport" as T
+participant "scsynth\n(UDP 57110)" as SC
+
+[-> P : execute(evento PLAY)
+P -> P : play(evento)
+P -> C : newSynth("classicPiano", note, durMs, third, amp)
+C -> C : nodeId = nextNodeId++
+C -> E : encode("/s_new", args)
+E --> C : byte[] (alineado a 4)
+C -> T : send(bytes)
+T -> SC : DatagramPacket
+SC -> SC : crea Synth(\\classicPiano)
+C --> P : nodeId
+@enduml
