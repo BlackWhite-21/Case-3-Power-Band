@@ -36,7 +36,6 @@ final class JnaPointerInputSource implements PointerEventSource {
     private volatile Window window;
     private volatile Pointer windowHandle;
     private volatile Pointer hookHandle;
-    private volatile PointerHook hookProcedure;
     private volatile boolean stopping;
     private boolean detaching;
     private int activeCallbacks;
@@ -82,7 +81,6 @@ final class JnaPointerInputSource implements PointerEventSource {
             this.window = pWindow;
             this.windowHandle = pWindowHandle;
             this.windowsPointerApi = pWindowsPointerApi;
-            this.hookProcedure = pHookProcedure;
             this.hookHandle = pHookHandle;
         } catch (UnsatisfiedLinkError | IllegalArgumentException e) {
             throw new DeviceException(IConstants.ERR_HUION_POINTER_API, e);
@@ -133,7 +131,6 @@ final class JnaPointerInputSource implements PointerEventSource {
                 }
             }
             hookHandle = null;
-            hookProcedure = null;
             windowHandle = null;
             windowsPointerApi = null;
             window = null;
@@ -380,7 +377,7 @@ final class JnaPointerInputSource implements PointerEventSource {
         "time",
         "point"
     })
-    private static final class NativeMessage extends Structure {
+    public static final class NativeMessage extends Structure {
 
         public Pointer window;
         public int message;
@@ -403,7 +400,7 @@ final class JnaPointerInputSource implements PointerEventSource {
         "tiltX",
         "tiltY"
     })
-    private static final class PointerPenInfo extends Structure {
+    public static final class PointerPenInfo extends Structure {
 
         public PointerInfo pointerInfo = new PointerInfo();
         public int penFlags;
@@ -432,7 +429,7 @@ final class JnaPointerInputSource implements PointerEventSource {
         "performanceCount",
         "buttonChangeType"
     })
-    private static final class PointerInfo extends Structure implements Structure.ByValue {
+    public static final class PointerInfo extends Structure implements Structure.ByValue {
 
         public int pointerType;
         public int pointerId;
@@ -453,12 +450,12 @@ final class JnaPointerInputSource implements PointerEventSource {
     }
 
     @Structure.FieldOrder({"x", "y"})
-    private static final class WinPoint extends Structure implements Structure.ByValue {
+    public static final class WinPoint extends Structure implements Structure.ByValue {
 
         public int x;
         public int y;
 
-        private WinPoint() {
+        public WinPoint() {
         }
 
         private WinPoint(int pX, int pY) {

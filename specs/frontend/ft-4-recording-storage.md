@@ -1,7 +1,7 @@
 ---
-id: ft-3
+id: ft-4
 layer: frontend
-status: draft
+status: approved
 ---
 
 # Guardado de grabaciones del editor musical

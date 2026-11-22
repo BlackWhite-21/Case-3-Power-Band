@@ -16,18 +16,31 @@ import powerband.util.IConstants;
  */
 public class HuionInstrument extends Instrument {
 
+    private static final System.Logger LOGGER = System.getLogger(HuionInstrument.class.getName());
+
     private final HuionInputSource inputSource;
     private final HuionInputMapper mapper;
+    private final Consumer<DeviceException> failureListener;
 
     public HuionInstrument(HuionInputSource pInputSource, SynthCommand pCommand,
             Consumer<SynthEvent> pEventListener) {
+        this(pInputSource, pCommand, pEventListener,
+                pException -> LOGGER.log(System.Logger.Level.ERROR, pException.getMessage(), pException));
+    }
+
+    public HuionInstrument(
+            HuionInputSource pInputSource,
+            SynthCommand pCommand,
+            Consumer<SynthEvent> pEventListener,
+            Consumer<DeviceException> pFailureListener) {
         super(pCommand, pEventListener);
         this.inputSource = Objects.requireNonNull(pInputSource);
         this.mapper = new HuionInputMapper();
+        this.failureListener = Objects.requireNonNull(pFailureListener);
     }
 
     public void start() throws DeviceException {
-        inputSource.start(this::accept);
+        inputSource.start(this::accept, this::handleInputFailure);
     }
 
     public void stop() throws DeviceException {
@@ -60,6 +73,23 @@ public class HuionInstrument extends Instrument {
             } catch (SynthException e) {
                 throw new IllegalStateException(IConstants.ERR_HUION_COMMAND, e);
             }
+        }
+    }
+
+    private void handleInputFailure(DeviceException pException) {
+        try {
+            accept(new TabletReading(
+                    IConstants.HUION_COORDINATE_MIN,
+                    IConstants.HUION_COORDINATE_MIN,
+                    IConstants.HUION_PRESSURE_MIN));
+        } catch (IllegalStateException pReleaseException) {
+            pException.addSuppressed(pReleaseException);
+        }
+        try {
+            failureListener.accept(pException);
+        } catch (RuntimeException pListenerException) {
+            pException.addSuppressed(pListenerException);
+            LOGGER.log(System.Logger.Level.ERROR, pException.getMessage(), pException);
         }
     }
 }

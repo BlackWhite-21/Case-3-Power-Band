@@ -7,6 +7,11 @@ import java.awt.Color;
  */
 public interface IConstants {
 
+    public static final int ZERO_INT = 0;
+    public static final long ZERO_LONG = 0L;
+    public static final byte PADDING_BYTE = 0;
+    public static final String EMPTY_STRING = "";
+
     // ------------------------------------------------------------ SuperCollider / OSC
     public static final String SC_DEFAULT_HOST = "127.0.0.1";
     public static final int SC_DEFAULT_PORT = 57110;
@@ -180,6 +185,7 @@ public interface IConstants {
     public static final int HUION_POINTER_QUEUE_CAPACITY = 4096;
     public static final int HUION_NO_ACTIVE_POINTER = -1;
     public static final int HUION_COORDINATE_MIN = 0;
+    public static final float HUION_COORDINATE_MAX = 1f;
     public static final int AWT_FLAG_NOT_SET = 0;
     public static final double HUION_POINTER_INVALID_SCALE = 0.0;
     public static final int NATIVE_ZERO = 0;
@@ -208,6 +214,10 @@ public interface IConstants {
     public static final int NAME_LENGTH = 32;                  // caracteres fijos del nombre
     public static final int MUSIC_RECORD_SIZE = 96;            // bytes por registro en recordings.music
     public static final int INDEX_RECORD_SIZE = 72;            // 32 chars * 2 bytes + long de 8 bytes
+    public static final int MUSIC_HEADER_FIXED_BYTES =
+            Byte.BYTES + NAME_LENGTH * Character.BYTES + 3 * Long.BYTES;
+    public static final int MUSIC_COMMAND_FIXED_BYTES =
+            Byte.BYTES + Long.BYTES + 4 * Integer.BYTES + 4 * Float.BYTES;
     public static final byte RECORD_TYPE_HEADER = 'H';
     public static final byte RECORD_TYPE_COMMAND = 'C';
     public static final char PADDING_CHAR = '\0';
@@ -230,6 +240,7 @@ public interface IConstants {
     public static final String APP_TITLE = "Power Band - Editor musical";
     public static final int WINDOW_WIDTH = 820;
     public static final int WINDOW_HEIGHT = 560;
+    public static final int UI_COMPONENT_GAP = 12;
     public static final int MONITOR_MAX_LINES = 400;
     public static final int MONITOR_ROWS = 20;
     public static final int MONITOR_COLUMNS = 70;
@@ -237,14 +248,17 @@ public interface IConstants {
     public static final Color IDLE_COLOR = new Color(60, 60, 60);
     public static final String BTN_RECORD = "● Grabar";
     public static final String BTN_STOP_RECORD = "■ Terminar grabación";
+    public static final String BTN_SAVE_RECORDING = "Guardar grabación...";
     public static final String BTN_LOAD = "Cargar...";
     public static final String BTN_PLAY = "▶ Play";
     public static final String BTN_STOP_PLAY = "■ Stop";
     public static final String LBL_NO_RECORDING = "Ninguna música cargada";
+    public static final String LBL_WAITING_FOR_NAME = "Grabación detenida; asigne un nombre para guardar.";
     public static final String LBL_LOADED = "Cargada: %s (bytes %d a %d, %d comandos)";
     public static final String LBL_RECORDING = "GRABANDO...";
     public static final String LBL_PLAYING = "Reproduciendo: %s";
     public static final String MSG_ASK_NAME = "Nombre de la música grabada:";
+    public static final String MSG_SAVED_RECORDING = "Grabación \"%s\" guardada.";
     public static final String MSG_DISCARD = "¿Descartar la grabación?";
     public static final String MSG_SELECT = "Seleccione una grabación (orden cronológico):";
     public static final String MSG_EMPTY_LIST = "No hay grabaciones todavía.";
@@ -292,4 +306,5 @@ public interface IConstants {
     public static final String ERR_RECORD_SIZE = "El registro excede el tamaño fijo de ";
     public static final String ERR_RECORD_TYPE = "Tipo de registro inesperado: ";
     public static final String ERR_NOTHING_LOADED = "Primero cargue una grabación.";
+    public static final String ERR_UNKNOWN_RECORDING = "Error inesperado al guardar la grabación.";
 }

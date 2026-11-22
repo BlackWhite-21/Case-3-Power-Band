@@ -10,7 +10,9 @@ import powerband.exception.DeviceException;
  */
 public interface HuionInputSource {
 
-    void start(Consumer<TabletReading> pReadingConsumer) throws DeviceException;
+    void start(
+            Consumer<TabletReading> pReadingConsumer,
+            Consumer<DeviceException> pFailureConsumer) throws DeviceException;
 
     void stop() throws DeviceException;
 }

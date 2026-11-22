@@ -1,7 +1,7 @@
 ---
-id: ft-5
+id: ft-4
 layer: database
-status: draft
+status: approved
 ---
 
 # Persistencia de grabaciones del editor musical
