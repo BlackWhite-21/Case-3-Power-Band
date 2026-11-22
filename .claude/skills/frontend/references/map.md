@@ -18,4 +18,4 @@ Window wrapper for the recording panel. `src/main/java/powerband/ui/RecordingEdi
 - `RecordingEditorFrame(RecordingService pRecordingService)` — creates and sizes the editor window.
 
 ## Entrypoints
-- No `Main` class exists yet; the frame is not wired into application startup.
+- `powerband.Main.main(String[] pArguments): void` in `src/main/java/powerband/Main.java` — creates and displays the recording editor before starting the available instruments.

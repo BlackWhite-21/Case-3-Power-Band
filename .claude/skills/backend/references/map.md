@@ -6,14 +6,19 @@ Source: `src/main/java/powerband`
 
 ## Implemented
 - OSC encoder, UDP transport/client, Bridge synth commands, Huion pointer-to-instrument adapter and mapper, microphone capture/analyzer, DTOs, exceptions, and constants in `src/main/java/powerband/`.
+- `Main` composes the recording service, Swing editor, OSC client, Huion saxophone instrument, and default-microphone violin instrument.
 - Recording event timing, name validation, and save coordination in `src/main/java/powerband/service/RecordingService.java`.
 - Binary persistence is in `src/main/java/powerband/repository/`; the recording UI is in `src/main/java/powerband/ui/`.
-- No `Main` or joystick instrument exists yet; the Huion pointer adapter is connected through `TabletaHuionInputSource`.
+- No joystick instrument exists yet.
 
 ## Entrypoints
-- Maven sets `powerband.Main` in `pom.xml`; `src/main/java/powerband/Main.java` is currently missing.
+- Maven sets `powerband.Main` in `pom.xml`; it opens the editor and starts the available instruments after the window becomes visible.
 
 ## Classes
+### Main
+Application entrypoint and dependency composition root. `src/main/java/powerband/Main.java`
+- `main(String[] pArguments): void` — opens the editor and starts Huion, microphone, and SuperCollider initialization.
+
 ### IOscTransport
 OSC transport interface. `src/main/java/powerband/osc/IOscTransport.java`
 - `send(byte[] pData): void` — sends an OSC packet.
