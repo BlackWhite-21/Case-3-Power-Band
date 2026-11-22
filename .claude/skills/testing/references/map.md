@@ -37,6 +37,23 @@ Tablet-to-MIDI mapping tests. `src/test/java/powerband/instrument/HuionInputMapp
 Bridge and input source integration test with a fake source. `src/test/java/powerband/instrument/HuionInstrumentTest.java`
 - `dispatchesTabletEventsAndReleasesNoteWhenStopped(): void` — checks event and OSC dispatch without hardware.
 
+### PointerEventMapperTest
+Huion Pointer API event, coordinate, pressure, and state mapping tests. `src/test/java/powerband/instrument/PointerEventMapperTest.java`
+- `normalizesRealPressureAndConvertsHiDpiComponentCoordinates(): void` — checks pressure normalization and logical coordinates.
+- `hoverMovementHasZeroPressureAndReleaseAlwaysClearsPressure(): void` — checks hover and leave pressure/state.
+- `reportsUnsupportedPressureInsteadOfInventingAReading(): void` — rejects unavailable pressure.
+- `reportsCoordinatesOutsideTheRegisteredComponentAsOutOfSurface(): void` — maps external coordinates to outside-surface state.
+- `rejectsInvalidPressureAndCoordinateTransforms(): void` — rejects invalid pressure and scaling.
+
+### TabletaGraficaTest
+Asynchronous adapter lifecycle and listener tests using a fake pointer source. `src/test/java/powerband/instrument/TabletaGraficaTest.java`
+- `dispatchesEventsOffTheEdtAndReleasesResourcesOnClose(): void` — checks worker delivery, release, and cleanup.
+- `listenerFailureDoesNotPreventDeliveryToOtherListeners(): void` — checks listener isolation.
+- `closingDoesNotBlockTheEventThreadWhileDetaching(): void` — checks nonblocking Swing shutdown.
+- `reportsAsynchronousCaptureFailuresToListeners(): void` — checks capture-error reporting.
+- `rejectsNonDisplayableComponentsAndRepeatedInitialization(): void` — checks lifecycle guards.
+- `rejectsUnsupportedOsBeforeLoadingWindowsApi(): void` — checks unsupported-platform handling.
+
 ### MicrophonePitchAnalyzerTest
 PCM-to-violin pitch and velocity tests. `src/test/java/powerband/instrument/MicrophonePitchAnalyzerTest.java`
 - `mapsA4ToneAndRmsToSustainedViolinEvent(): void` — checks pitch and level conversion.

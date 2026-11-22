@@ -95,6 +95,14 @@ Normalized joystick axes and button bit mask. `src/main/java/powerband/dto/Joyst
 Normalized Huion position and pressure. `src/main/java/powerband/dto/TabletReading.java`
 - Record accessors: `x(): float`, `y(): float`, and `pressure(): float`.
 
+### DatosTableta
+Immutable Huion pointer reading in Swing logical coordinates. `src/main/java/powerband/dto/DatosTableta.java`
+- Record accessors: `x(): double`, `y(): double`, `pressure(): float`, and `estado(): EstadoPluma`.
+
+### EstadoPluma
+Huion pen state enum. `src/main/java/powerband/dto/EstadoPluma.java`
+- Values: `PRESIONADO`, `MOVIMIENTO`, `LIBERADO`, and `FUERA_SUPERFICIE`.
+
 ### RecordingInfo
 Recording-list row model. `src/main/java/powerband/dto/RecordingInfo.java`
 - `toString(): String` — formats the date and recording name for display.
@@ -150,6 +158,42 @@ Connects a Huion source and mapper to a synth command. `src/main/java/powerband/
 - `start(): void` — subscribes to the input source.
 - `stop(): void` — stops the source and releases the active note.
 - `accept(TabletReading pReading): void` — dispatches events for one reading.
+
+### TabletaGrafica
+Asynchronous Swing-facing Huion pointer adapter with listener lifecycle and failure reporting. `src/main/java/powerband/instrument/TabletaGrafica.java`
+- `initialize(Component pComponent): CompletableFuture<Void>` — attaches capture to the displayable component.
+- `addListener(TabletaListener pListener): void` — registers a data/error listener.
+- `removeListener(TabletaListener pListener): void` — removes a registered listener.
+- `getFailure(): Optional<DeviceException>` — returns the asynchronous capture failure, if any.
+- `closeAsync(): CompletableFuture<Void>` — requests capture termination and returns its completion.
+- `close(): void` — requests asynchronous termination.
+
+### TabletaListener
+Receives tablet data and optional device failures. `src/main/java/powerband/instrument/TabletaListener.java`
+- `onDatosTableta(DatosTableta pDatos): void` — receives a pen reading off the EDT.
+- `onError(DeviceException pException): void` — receives an asynchronous capture error.
+
+### JnaPointerInputSource
+Package-private JNA implementation using a thread message hook and Windows Pointer API. `src/main/java/powerband/instrument/JnaPointerInputSource.java`
+- `attach(Component pComponent): void` — installs the hook for the Swing window on the EDT.
+- `pollEvent(int pTimeoutMs): DatosTableta` — waits for queued pointer data and maps its coordinates/state.
+- `requestStop(): void` — prevents further pointer events from being queued.
+- `detach(): void` — removes the hook and releases references.
+
+### PointerEventSource
+Package-private injectable source contract used by the adapter. `src/main/java/powerband/instrument/PointerEventSource.java`
+- `attach(Component pComponent): void` — initializes the event source.
+- `pollEvent(int pTimeoutMs): DatosTableta` — returns the next reading or `null` on timeout.
+- `requestStop(): void` — requests capture termination.
+- `detach(): void` — releases source resources.
+
+### PointerEventMapper
+Package-private Windows-message and coordinate-to-DTO mapper. `src/main/java/powerband/instrument/PointerEventMapper.java`
+- `map(NativePointerEvent pEvent): DatosTableta` — validates pressure/coordinates and creates the normalized reading.
+
+### NativePointerEvent
+Package-private immutable queue event with a Swing geometry snapshot. `src/main/java/powerband/instrument/NativePointerEvent.java`
+- Record accessors expose message, pressure, contact, coordinate availability, and captured scale/bounds.
 
 ### MicrophoneAudioSource
 Injectable PCM source abstraction. `src/main/java/powerband/instrument/MicrophoneAudioSource.java`
