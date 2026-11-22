@@ -19,6 +19,10 @@ Source: `src/main/java/powerband`
 Application entrypoint and dependency composition root. `src/main/java/powerband/Main.java`
 - `main(String[] pArguments): void` — opens the editor and starts Huion, microphone, and SuperCollider initialization.
 
+### Main.InstrumentStarter
+Package-private startup action contract for a device instrument. `src/main/java/powerband/Main.java`
+- `start(): void` — starts an instrument and may report a `DeviceException`.
+
 ### IOscTransport
 OSC transport interface. `src/main/java/powerband/osc/IOscTransport.java`
 - `send(byte[] pData): void` — sends an OSC packet.
@@ -188,7 +192,7 @@ Receives tablet data and optional device failures. `src/main/java/powerband/inst
 - `onError(DeviceException pException): void` — receives an asynchronous capture error.
 
 ### JnaPointerInputSource
-Package-private JNA implementation using a thread message hook and Windows Pointer API. `src/main/java/powerband/instrument/JnaPointerInputSource.java`
+Package-private JNA implementation using a thread message hook and Windows Pointer API, with an injectable API for lifecycle tests. `src/main/java/powerband/instrument/JnaPointerInputSource.java`
 - `attach(Component pComponent): void` — installs the hook for the Swing window on the EDT.
 - `pollEvent(int pTimeoutMs): DatosTableta` — waits for queued pointer data and maps its coordinates/state.
 - `requestStop(): void` — prevents further pointer events from being queued.

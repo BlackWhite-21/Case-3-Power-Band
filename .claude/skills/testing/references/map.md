@@ -5,6 +5,11 @@ After you change this layer, update this file so the next run stays current.
 Source: `src/test/java/powerband`
 
 ## Test classes
+### MainTest
+Application instrument-start isolation tests. `src/test/java/powerband/MainTest.java`
+- `reportsOneInstrumentFailureWithoutPreventingAnotherFromStarting(): void` — verifies isolated device startup failures.
+- `doesNotStartAnInstrumentAfterShutdownWasRequested(): void` — verifies shutdown prevents startup.
+
 ### OscMessageEncoderTest
 OSC encoding tests. `src/test/java/powerband/osc/OscMessageEncoderTest.java`
 - `messageLengthIsMultipleOfFour(): void` — checks OSC packet alignment.
@@ -63,6 +68,11 @@ Asynchronous adapter lifecycle and listener tests using a fake pointer source. `
 ### JnaPointerStructureTest
 Windows Pointer API structure layout tests without loading User32. `src/test/java/powerband/instrument/JnaPointerStructureTest.java`
 - `nativeStructuresHaveConsistentFieldLayouts(): void` — checks JNA field orders, x64 structure sizes, and ABI offsets.
+
+### JnaPointerInputSourceTest
+Hook callback reference lifecycle tests with a fake Windows Pointer API. `src/test/java/powerband/instrument/JnaPointerInputSourceTest.java`
+- `retainsCallbackUntilUnhookAndActiveCallbacksFinish(): void` — checks callback retention while hooks and callbacks are active.
+- `retainsCallbackWhenUnhookFails(): void` — checks the callback remains retained after unhook failure.
 
 ### MicrophonePitchAnalyzerTest
 PCM-to-violin pitch and velocity tests. `src/test/java/powerband/instrument/MicrophonePitchAnalyzerTest.java`
