@@ -1,4 +1,4 @@
-@startuml
+@startuml ft-3-recording-storage
 actor Usuario
 participant "Editor Swing" as UI
 participant "Instrumentos" as Instruments

@@ -1,5 +1,5 @@
 ---
-id: ft-1
+id: ft-6
 layer: testing
 status: draft
 ---
@@ -32,7 +32,7 @@ status: draft
 
 ## Assets
 
-- Diagrama del flujo: `specs/diagrams/ft-1-recording-storage.puml`.
+- Diagrama del flujo: `specs/diagrams/ft-3-recording-storage.puml`.
 - Convenciones de pruebas: JUnit 5, clases `*Test`, espejo de paquetes bajo `src/test/java/powerband/` y `@TempDir`.
 
 ## Implementation guidelines
