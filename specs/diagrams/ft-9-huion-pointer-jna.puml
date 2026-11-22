@@ -1,0 +1,59 @@
+@startuml ft-9-huion-pointer-jna
+title ft-9 - Adaptador JNA para tableta Huion en Swing
+skinparam classAttributeIconSize 0
+hide empty members
+
+class TabletaGrafica {
+  - component : Component
+  - eventSource : JnaPointerInputSource
+  - listeners : List<TabletaListener>
+  + initialize(pComponent : Component)
+  + addListener(pListener : TabletaListener)
+  + removeListener(pListener : TabletaListener)
+  + close()
+}
+
+record DatosTableta {
+  + x : double
+  + y : double
+  + pressure : float
+  + estado : EstadoPluma
+}
+
+enum EstadoPluma {
+  PRESIONADO
+  MOVIMIENTO
+  LIBERADO
+  FUERA_SUPERFICIE
+}
+
+interface TabletaListener {
+  + onDatosTableta(pDatos : DatosTableta)
+}
+
+class JnaPointerInputSource <<JNA>> {
+  + attach(pComponent : Component)
+  + pollEvent(pTimeoutMs : int) : DatosTableta
+  + requestStop()
+  + detach()
+}
+
+interface WindowsPointerApi <<JNA>> {
+  + GetPointerType(pPointerId, pType)
+  + GetPointerPenInfo(pPointerId, pPenInfo)
+  + SetWindowsHookExW(pHookType, pHookProc, pModule, pThreadId)
+  + UnhookWindowsHookEx(pHook)
+}
+
+TabletaGrafica --> JnaPointerInputSource
+TabletaGrafica --> TabletaListener
+TabletaGrafica ..> DatosTableta : publica
+DatosTableta --> EstadoPluma
+JnaPointerInputSource --> WindowsPointerApi
+JnaPointerInputSource ..> NativePointerEvent : encola
+
+note right of TabletaGrafica
+  Los eventos se despachan en un hilo de trabajo,
+  nunca desde el EDT ni desde el callback JNA del hook.
+end note
+@enduml

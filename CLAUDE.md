@@ -14,7 +14,7 @@ El programa tiene tres partes:
 - Maven project. Sin `src/main/java` alternativo.
 - Java Swing para la UI del editor.
 - `javax.sound.sampled` para capturar audio desde el micrófono predeterminado del sistema.
-- Tableta gráfica Huion mediante un adaptador de controlador que expone coordenadas y presión.
+- Tableta gráfica Huion mediante JNA y Windows Pointer API, con coordenadas y presión reportadas por el controlador; no usar JNI ni código C++ propio.
 - JUnit 5 para pruebas unitarias.
 - GitHub para control de versiones.
 - El joystick solo funciona en Windows (winmm). En otro sistema el instrumento queda "no disponible" y el resto del programa sigue.

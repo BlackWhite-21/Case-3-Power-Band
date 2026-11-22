@@ -8,7 +8,7 @@ Programa de creación musical: tres dispositivos físicos tocan tres sintetizado
 | Tableta gráfica Huion | `saxophone` | X selecciona uno de los 12 semitonos, Y una de dos octavas (MIDI 48–71), y la presión controla el volumen. Levantar el lápiz termina la nota. |
 | Micrófono predeterminado del sistema | `violin` | El pitch detectado selecciona la nota y el nivel RMS controla el volumen; silencio termina la nota. |
 
-`classicPiano` y `stringBass` permanecen como synths legacy para reproducir grabaciones previas. La aplicación Java recibe datos Huion normalizados mediante `HuionInputSource`; falta conectar esa interfaz con el API/controlador específico de la tableta.
+`classicPiano` y `stringBass` permanecen como synths legacy para reproducir grabaciones previas. El adaptador `TabletaGrafica` usa JNA para leer Windows Pointer API y entregar coordenadas, presión real y estado del lápiz a consumidores Swing. No usa eventos de mouse para inferir presión ni requiere código JNI/C++ propio.
 
 ## Prerrequisitos
 
@@ -18,6 +18,9 @@ Programa de creación musical: tres dispositivos físicos tocan tres sintetizado
 | Apache Maven | 3.9 o superior | `mvn -version` |
 | SuperCollider | 3.13 o superior | https://supercollider.github.io/downloads.html |
 | Sistema | Windows (el joystick usa `winmm.dll`) | |
+
+Las dependencias JNA se resuelven desde Maven; no se necesita instalar CMake ni un compilador C++.
+Un diagnóstico previo en Windows 11 confirmó que la Kamvas 13 GS1331 y el controlador HUION HID 6.1.7600.16905 exponen eventos `PT_PEN` y presión variable. La integración física del hook JNA y la validación en Windows 10 siguen pendientes antes de distribuir el adaptador.
 
 ## Correr
 
