@@ -7,5 +7,5 @@ description: "JUnit 5 testing conventions for Java projects"
 - Test classes are named `<ClassName>Test.java`.
 - Test method names describe behavior, e.g. `rejectsDuplicateName`.
 - Shared test helpers (fake OSC transport, etc.) live in `src/test/java/powerband/helpers/`.
-- Tests never need SuperCollider, a joystick, a microphone or a camera running: use fakes and `@TempDir`.
+- Tests never need SuperCollider or physical instruments running: use fakes and `@TempDir`.
 - Run tests with `mvn test`.

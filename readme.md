@@ -5,8 +5,10 @@ Programa de creación musical: tres dispositivos físicos tocan tres sintetizado
 | Dispositivo | Synth | Cómo se toca |
 |---|---|---|
 | Joystick / control USB | `organ70s` | Botones 1 a 8 = notas de la escala de Do mayor (presionar = suena, soltar = calla). Ejes X, Y, Z = timbre (parciales del órgano). |
-| Micrófono de la laptop | `stringBass` | Un golpe o aplauso toca Do; cantar/tararear una nota toca esa nota en el bajo. El volumen da la intensidad. |
-| Cámara web | `classicPiano` | Mover la mano frente a la cámara: izquierda = notas graves, derecha = agudas; mitad de arriba = acorde mayor, abajo = menor. |
+| Tableta gráfica Huion | `saxophone` | X selecciona uno de los 12 semitonos, Y una de dos octavas (MIDI 48–71), y la presión controla el volumen. Levantar el lápiz termina la nota. |
+| Micrófono predeterminado del sistema | `violin` | El pitch detectado selecciona la nota y el nivel RMS controla el volumen; silencio termina la nota. |
+
+`classicPiano` y `stringBass` permanecen como synths legacy para reproducir grabaciones previas. La aplicación Java recibe datos Huion normalizados mediante `HuionInputSource`; falta conectar esa interfaz con el API/controlador específico de la tableta.
 
 ## Prerrequisitos
 
@@ -19,15 +21,13 @@ Programa de creación musical: tres dispositivos físicos tocan tres sintetizado
 
 ## Correr
 
-1. Abra `supercollider/myband.sc` en SuperCollider, ponga el cursor dentro del bloque grande `( ... )` y presione **Ctrl+Enter**. Luego evalúe la línea `~myband.load;` (Ctrl+Enter). En la consola debe salir `myband: classicPiano, stringBass, organ70s loaded`.
+1. Abra `supercollider/myband.sc` en SuperCollider, ponga el cursor dentro del bloque grande `( ... )` y presione **Ctrl+Enter**. Luego evalúe la línea `~myband.load;` (Ctrl+Enter). En la consola debe salir `myband: classicPiano, stringBass, saxophone, violin, organ70s loaded`.
 2. Conecte el joystick.
 3. En la carpeta del proyecto (donde está `pom.xml`):
 
 ```powershell
 mvn compile exec:java
 ```
-
-La primera vez Maven descarga OpenCV (unos 100 MB).
 
 Si SuperCollider no está arriba, el programa avisa y sigue abierto. Si un dispositivo no está, su línea dice `no disponible: ...` y los otros dos siguen funcionando.
 
@@ -59,8 +59,8 @@ Las pruebas no necesitan SuperCollider ni los dispositivos (usan un transporte O
 ```
 src/main/java/powerband/
 ├── Main.java          # arranque
-├── instrument/        # Bridge: abstracción (Instrument, Joystick, Micrófono, Cámara)
-├── synth/             # Bridge: implementación (SynthCommand, Piano, Bass, Organ)
+├── instrument/        # Bridge: abstracción (Instrument, Joystick, Huion, Micrófono)
+├── synth/             # Bridge: implementación (SynthCommand, Saxophone, Violin, Organ)
 ├── osc/               # cliente OSC/UDP hacia scsynth
 ├── service/           # editor: grabar, cargar, reproducir
 ├── repository/        # archivos binarios, Balanced Merge Sort, búsqueda binaria

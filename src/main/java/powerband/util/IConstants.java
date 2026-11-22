@@ -32,9 +32,13 @@ public interface IConstants {
     public static final int SYNTH_PIANO_ID = 1;
     public static final int SYNTH_BASS_ID = 2;
     public static final int SYNTH_ORGAN_ID = 3;
+    public static final int SYNTH_SAXOPHONE_ID = 4;
+    public static final int SYNTH_VIOLIN_ID = 5;
     public static final String SYNTH_PIANO_NAME = "classicPiano";
     public static final String SYNTH_BASS_NAME = "stringBass";
     public static final String SYNTH_ORGAN_NAME = "organ70s";
+    public static final String SYNTH_SAXOPHONE_NAME = "saxophone";
+    public static final String SYNTH_VIOLIN_NAME = "violin";
 
     // Parámetros de los SynthDefs (nombres tal cual en myband.sc)
     public static final String PARAM_NOTE = "note";
@@ -48,6 +52,7 @@ public interface IConstants {
     public static final String PARAM_A1 = "a1";
     public static final String PARAM_A2 = "a2";
     public static final String PARAM_A3 = "a3";
+    public static final String PARAM_GATE = "gate";
 
     // Acciones de un comando
     public static final int ACTION_PLAY = 1;   // nota con duración (one-shot)
@@ -66,6 +71,10 @@ public interface IConstants {
     public static final int BASS_DEFAULT_DUR_MS = 700;
     public static final float BASS_AMP_MIN = 0.2f;
     public static final float BASS_AMP_MAX = 0.8f;
+
+    // Saxophone and violin
+    public static final int DEFAULT_SUSTAINED_DUR_MS = 800;
+    public static final float SUSTAINED_AMP_MAX = 0.8f;
 
     // Órgano
     public static final float ORGAN_R1 = 1f;
@@ -125,6 +134,7 @@ public interface IConstants {
     public static final boolean MIC_BIG_ENDIAN = false;
     public static final int MIC_FRAME_SAMPLES = 2048;
     public static final int MIC_BYTES_PER_SAMPLE = 2;
+    public static final int MIC_FRAME_BYTES = MIC_FRAME_SAMPLES * MIC_BYTES_PER_SAMPLE * MIC_CHANNELS;
     public static final int MIC_LINE_BUFFER_FRAMES = 2;
     public static final int BYTE_MASK = 0xFF;
     public static final int BITS_PER_BYTE = 8;
@@ -136,26 +146,20 @@ public interface IConstants {
     public static final double PITCH_MIN_FREQ = 50.0;
     public static final double PITCH_MAX_FREQ = 600.0;
     public static final double PITCH_MIN_CORRELATION = 0.5;
+    public static final int MIDI_MIN_NOTE = 0;
+    public static final int MIDI_MAX_NOTE = 127;
     public static final int BASS_MIN_NOTE = 28;
     public static final int BASS_MAX_NOTE = 52;
     public static final int BASS_FALLBACK_NOTE = 36;
 
-    // Cámara
-    public static final String CAM_DEVICE_NAME = "Cámara web";
-    public static final int CAM_INDEX = 0;
-    public static final int CAM_SMALL_WIDTH = 80;
-    public static final int CAM_SMALL_HEIGHT = 60;
-    public static final double CAM_PIXEL_DIFF = 30.0;
-    public static final double CAM_MASK_VALUE = 255.0;
-    public static final float CAM_MOTION_THRESHOLD = 0.04f;
-    public static final float CAM_MOTION_GAIN = 4f;
-    public static final long CAM_COOLDOWN_MS = 350;
-    public static final int CAM_POLL_MS = 40;
-    public static final int CAM_BASE_NOTE = 48;
-    public static final int CAM_OCTAVES = 2;
-    public static final float CAM_MAJOR_ZONE = 0.5f;
-    public static final float TIMBRE_ON = 1f;
-    public static final float TIMBRE_OFF = 0f;
+    // Huion tablet
+    public static final String HUION_DEVICE_NAME = "Tableta gráfica Huion";
+    public static final int HUION_BASE_NOTE = 48;
+    public static final int HUION_OCTAVE_COUNT = 2;
+    public static final int NO_ACTIVE_NOTE = -1;
+    public static final String HUION_INPUT_THREAD_NAME = "powerband-huion-input";
+    public static final String MICROPHONE_THREAD_NAME = "powerband-microphone-input";
+    public static final int DEVICE_STOP_TIMEOUT_MS = 1000;
 
     // ------------------------------------------------------------ Archivos
     public static final String DATA_DIR = "data";
@@ -228,8 +232,10 @@ public interface IConstants {
     public static final String ERR_JOY_NOT_WINDOWS = "el joystick usa winmm.dll y solo funciona en Windows";
     public static final String ERR_JOY_READ = "error leyendo el joystick";
     public static final String ERR_MIC_OPEN = "no se pudo abrir el micrófono";
-    public static final String ERR_CAM_OPEN = "no se pudo abrir la cámara";
-    public static final String ERR_CAM_LIB = "no se pudo cargar OpenCV";
+    public static final String ERR_MIC_READ = "error leyendo el micrófono";
+    public static final String ERR_MIC_STOP = "error cerrando el micrófono";
+    public static final String ERR_HUION_STOP = "error deteniendo la tableta Huion";
+    public static final String ERR_HUION_COMMAND = "no se pudo enviar el comando de la tableta a SuperCollider";
     public static final String ERR_NAME_EMPTY = "El nombre no puede estar vacío.";
     public static final String ERR_NAME_LONG = "El nombre puede tener máximo " + NAME_LENGTH + " caracteres.";
     public static final String ERR_NAME_CHARS = "Use solo letras, números, espacios, guiones y guion bajo.";
