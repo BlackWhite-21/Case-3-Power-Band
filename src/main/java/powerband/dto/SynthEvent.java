@@ -5,7 +5,7 @@ package powerband.dto;
  * Inmutable: para cambiar el tiempo se crea una copia con {@link #withOffset(long)}.
  *
  * @param offsetMs ms desde el inicio de la grabación (0 si no se está grabando)
- * @param synthId  SYNTH_PIANO_ID, SYNTH_BASS_ID o SYNTH_ORGAN_ID
+ * @param synthId  ID of one of the registered SuperCollider synth commands
  * @param action   ACTION_PLAY, ACTION_ON o ACTION_OFF
  * @param note     nota MIDI
  * @param durMs    duración en ms (solo ACTION_PLAY)

@@ -1,7 +1,7 @@
 package powerband.exception;
 
 /**
- * Falla al abrir o leer un dispositivo físico (joystick, micrófono, cámara).
+ * Falla al abrir o leer un dispositivo físico (joystick, micrófono o tableta).
  */
 public class DeviceException extends PowerBandException {
 

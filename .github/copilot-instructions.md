@@ -25,7 +25,6 @@ Los synths ya están hechos, pero usted tiene la libertad de modificarlos o crea
 - Los instrumentos deben ser dispositivos que emitan valores que usted pueda transformar adecuadamente en los parámetros que requieren los synths.
 - El profesor le proporciona el archivo [BandClient.java](src/caso-3/BandClient.java), que puede usar como guía para conectarse e invocar los synths una vez cargados en el servidor de SuperCollider.
 - Los dispositivos **no pueden ser teclado ni mouse**. Sí pueden ser, por ejemplo: superficies táctiles, joysticks, sensores, termómetros, etc. Pueden conectarse por USB, Wifi/red, Bluetooth, o ser dispositivos ya integrados en la computadora.
-- También puede considerar el acelerómetro, el giroscopio y la cámara de su teléfono. Tenga en cuenta que en ese caso debe crear el instrumento como una aplicación Android. No se recomienda este enfoque en iOS.
 - No debe comprar hardware. Primero consulte con el profesor para ver qué posibilidades tiene; de lo contrario, el profesor buscará cómo facilitarle algún hardware para usarlo como instrumento.
 - Debe integrar **un dispositivo diferente por sintetizador**, de forma que pueda controlar y disparar los 3 synths en cualquier momento usando los instrumentos conectados a su programa.
 - Cuando el programa se inicia, los instrumentos se activan, se establece la conexión con SuperCollider y también se accede al módulo del editor musical.
@@ -81,7 +80,14 @@ Esta sección no agrega requisitos nuevos; precisa puntos que la descripción de
 - Se espera que cuente con un ambiente de desarrollo configurado para IA y con la versión resumida de *spec driven development*.
 
 # Copilot project instructions
-Use Java only. JDK 22 o superior (el curso usa 26.0.2), Maven project, Java Swing for the UI. Use JUnit 5 for unit testing. Use GitHub for source control and code repository.
+Use Java only. JDK 22 o superior (el curso usa 26.0.2), Maven project, Java Swing for the UI. Use `javax.sound.sampled` to capture audio from the system's default microphone. Use JUnit 5 for unit testing. Use GitHub for source control and code repository.
+
+Instrument-to-synth mapping:
+- USB joystick/controller → `organ70s`.
+- Huion graphics tablet → `saxophone`.
+- System default microphone → `violin`.
+
+`classicPiano` and `stringBass` remain available only for legacy recordings. Active instrument mappings are Huion tablet → `saxophone`, default microphone → `violin`, and USB joystick/controller → `organ70s`.
 
 The entrypoint (public static void main) stays in src/main/java/powerband/Main.java.
 Instruments (Bridge abstraction) stay in src/main/java/powerband/instrument/.

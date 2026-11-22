@@ -1,5 +1,5 @@
 /*
- myband.sc - three synths + loader + test
+ myband.sc - legacy and active synths + loader + test
 
  Usage (SuperCollider IDE): open this file and evaluate it with Ctrl+Enter
  inside the parenthesis block below. Then:
@@ -11,9 +11,11 @@
    ~myband.piano(57, 2000, 3);                // A3 minor chord (third = 3 semitones)
    ~myband.bass(36, 800);                     // C2 string bass, 800 ms
    ~myband.noteOn(60);                        // 70's organ, default partials 1/2/3
-   ~myband.noteOn(64, [1, 2.01, 4], [1, 0.6, 0.3]);  // custom partial ratios / amps
+   ~myband.saxOn(60);                         // saxophone, sustained note
+   ~myband.violinOn(69);                      // violin, sustained note
+   ~myband.saxOff(60);
+   ~myband.violinOff(69);
    ~myband.noteOff(60);
-   ~myband.noteOff(64);
 
  All "note" arguments are MIDI note numbers, durations are in milliseconds.
 */
@@ -22,6 +24,8 @@
 ~myband = ();
 
 ~myband[\active] = Dictionary.new;   // midi note -> running organ synth
+~myband[\saxActive] = Dictionary.new;
+~myband[\violinActive] = Dictionary.new;
 
 // ---------------------------------------------------------------- SynthDefs
 ~myband[\defs] = {
@@ -74,7 +78,37 @@
 		Out.ar(out, (sig * env * amp) ! 2);
 	}).add;
 
-	// 3) 70's organ: three partials set by parameter, sustained until gate = 0.
+	// 3) Saxophone: resonant reed-like tone, sustained until gate = 0.
+	SynthDef(\saxophone, { |out = 0, note = 60, amp = 0.3, gate = 1,
+		vibRate = 5.2, vibDepth = 0.012, atk = 0.04, rel = 0.18|
+		var freq, vib, reed, formants, env, sig;
+		freq = note.midicps;
+		vib = SinOsc.kr(vibRate, 0, vibDepth);
+		reed = (Saw.ar(freq * (1 + vib)) * 0.65) + (Pulse.ar(freq, 0.48) * 0.35);
+		formants = BPF.ar(reed, [freq * 2.5, freq * 4.2, freq * 6.1], [0.8, 0.55, 0.4]);
+		sig = Mix(formants) + (reed * 0.2);
+		sig = (sig * 1.7).tanh;
+		env = EnvGen.kr(Env.asr(atk, 1, rel), gate, doneAction: 2);
+		Out.ar(out, (sig * env * amp) ! 2);
+	}).add;
+
+	// 4) Violin: bowed harmonics with a small vibrato, sustained until gate = 0.
+	SynthDef(\violin, { |out = 0, note = 69, amp = 0.3, gate = 1,
+		vibRate = 5.5, vibDepth = 0.006, atk = 0.12, rel = 0.35|
+		var freq, vib, bow, body, env, sig;
+		freq = note.midicps;
+		vib = SinOsc.kr(vibRate, 0, vibDepth) * Line.kr(0, 1, 0.7);
+		bow = Mix.fill(4, { |partial|
+			var harmonic = partial + 1;
+			Saw.ar(freq * harmonic * (1 + vib), 1 / harmonic)
+		});
+		body = BPF.ar(bow, [freq * 2, freq * 3.5], [0.9, 0.65]);
+		sig = LPF.ar(bow * 0.45 + Mix(body), 9000);
+		env = EnvGen.kr(Env.asr(atk, 1, rel), gate, doneAction: 2);
+		Out.ar(out, (sig * env * amp * 0.25) ! 2);
+	}).add;
+
+	// 5) 70's organ: three partials set by parameter, sustained until gate = 0.
 	//    "Magnetic" feel: slow tape-like drift per partial, delayed vibrato,
 	//    detuned twin oscillators (phasing) and soft saturation.
 	SynthDef(\organ70s, { |out = 0, freq = 220, amp = 0.3, gate = 1,
@@ -110,7 +144,7 @@
 		Server.default.bootSync;
 		self.defs.value;
 		Server.default.sync;
-		"myband: classicPiano, stringBass, organ70s loaded".postln;
+		"myband: classicPiano, stringBass, saxophone, violin, organ70s loaded".postln;
 		onLoaded.value;
 	};
 };
@@ -122,6 +156,26 @@
 
 ~myband[\bass] = { |self, note = 36, durMs = 1000, amp = 0.5|
 	Synth(\stringBass, [\note, note, \durMs, durMs, \amp, amp]);
+};
+
+~myband[\saxOn] = { |self, note = 60, amp = 0.3|
+	self.saxOff(note);
+	self.saxActive[note] = Synth(\saxophone, [\note, note, \amp, amp]);
+};
+
+~myband[\saxOff] = { |self, note = 60|
+	var syn = self.saxActive.removeAt(note);
+	if(syn.notNil) { syn.set(\gate, 0) };
+};
+
+~myband[\violinOn] = { |self, note = 69, amp = 0.3|
+	self.violinOff(note);
+	self.violinActive[note] = Synth(\violin, [\note, note, \amp, amp]);
+};
+
+~myband[\violinOff] = { |self, note = 69|
+	var syn = self.violinActive.removeAt(note);
+	if(syn.notNil) { syn.set(\gate, 0) };
 };
 
 ~myband[\noteOn] = { |self, note = 60, ratios = #[1, 2, 3], amps = #[1, 0.5, 0.25], amp = 0.3|
@@ -150,6 +204,14 @@
 			"-- string bass: C - G - A - F".postln;
 			[36, 43, 45, 41].do { |n| self.bass(n, 450); 0.5.wait };
 			0.5.wait;
+
+			"-- saxophone: saxOn / saxOff".postln;
+			self.saxOn(60);                  0.8.wait;
+			self.saxOff(60);                 0.3.wait;
+
+			"-- violin: violinOn / violinOff".postln;
+			self.violinOn(69);               0.8.wait;
+			self.violinOff(69);              0.3.wait;
 
 			"-- organ 70s: noteOn / noteOff".postln;
 			self.noteOn(60);                                   1.5.wait;

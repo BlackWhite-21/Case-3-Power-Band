@@ -69,6 +69,10 @@ public class OscClient implements AutoCloseable {
         send(OSC_NODE_SET, pNodeId, pName, pValue);
     }
 
+    public void setControl(int pNodeId, String pName, float pValue) throws SynthException {
+        send(OSC_NODE_SET, pNodeId, pName, pValue);
+    }
+
     /** synchronized: varios instrumentos (hilos) comparten el mismo socket. */
     private synchronized void send(String pPath, Object... pArgs) throws SynthException {
         try {

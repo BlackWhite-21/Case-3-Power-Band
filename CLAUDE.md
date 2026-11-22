@@ -1,20 +1,20 @@
 # Project description
-Power Band (Caso #3, POO) es un programa de creación e interacción musical. Java invoca, por OSC sobre UDP, tres sintetizadores de SuperCollider (`supercollider/myband.sc`): `classicPiano`, `stringBass` y `organ70s`.
+Power Band (Caso #3, POO) es un programa de creación e interacción musical. Java invoca, por OSC sobre UDP, tres sintetizadores activos de SuperCollider (`supercollider/myband.sc`): `saxophone`, `violin` y `organ70s`. `classicPiano` y `stringBass` se conservan únicamente para reproducir grabaciones antiguas.
 
 El programa tiene tres partes:
 1. Sintetizadores: viven en SuperCollider (scsynth, UDP 57110) y generan el sonido.
 2. Instrumentos: dispositivos físicos (no teclado ni mouse) que Java lee y transforma en parámetros de los synths. Un dispositivo distinto por synth:
    - Joystick/control USB → `organ70s` (botones = noteOn/noteOff, ejes = parciales del órgano).
-   - Micrófono de la laptop → `stringBass` (golpe o nota cantada = nota de bajo).
-   - Cámara web → `classicPiano` (movimiento frente a la cámara = acorde).
+   - Tableta gráfica Huion → `saxophone` (X selecciona semitono, Y octava, presión volumen; levantar el lápiz termina la nota).
+   - Micrófono predeterminado del sistema → `violin` (pitch detectado = nota MIDI, RMS = volumen).
 3. Editor musical: monitorea todos los comandos que los instrumentos envían a SuperCollider, graba, carga y reproduce música.
 
 # Tech stack
 - Java 22 o superior (se usa la API Foreign Function & Memory para leer el joystick desde `winmm.dll`).
 - Maven project. Sin `src/main/java` alternativo.
 - Java Swing para la UI del editor.
-- `javax.sound.sampled` para el micrófono.
-- `org.openpnp:opencv` para la cámara web.
+- `javax.sound.sampled` para capturar audio desde el micrófono predeterminado del sistema.
+- Tableta gráfica Huion mediante un adaptador de controlador que expone coordenadas y presión.
 - JUnit 5 para pruebas unitarias.
 - GitHub para control de versiones.
 - El joystick solo funciona en Windows (winmm). En otro sistema el instrumento queda "no disponible" y el resto del programa sigue.

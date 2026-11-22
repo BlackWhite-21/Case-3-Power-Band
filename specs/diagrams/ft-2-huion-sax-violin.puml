@@ -1,0 +1,71 @@
+@startuml ft-2-huion-sax-violin
+title ft-2 - Instrumentos Huion y micrófono con synths
+skinparam classAttributeIconSize 0
+hide empty members
+
+record TabletReading {
+  x : float
+  y : float
+  pressure : float
+}
+
+interface HuionInputSource {
+  +read() : TabletReading
+}
+
+abstract class Instrument <<Abstraction>> {
+  - command : SynthCommand
+  + start()
+  + stop()
+}
+
+class HuionInstrument {
+  - mapper : HuionInputMapper
+  + accept(pReading : TabletReading)
+}
+
+class MicrophoneInstrument {
+  - input : TargetDataLine
+  + start()
+  + stop()
+}
+
+class HuionInputMapper {
+  + map(pReading : TabletReading) : List<SynthEvent>
+}
+
+abstract class SynthCommand <<Implementor>> {
+  + execute(pEvent : SynthEvent)
+}
+
+class SaxophoneCommand {
+  - activeNode : int
+  + execute(pEvent : SynthEvent)
+}
+
+class ViolinCommand {
+  - activeNode : int
+  + execute(pEvent : SynthEvent)
+}
+
+class OrganCommand
+class OscClient {
+  + newSynth(pName, pControls...) : int
+  + setControl(pNodeId, pName, pValue)
+}
+class SynthEvent
+
+HuionInputSource --> HuionInstrument
+HuionInstrument --|> Instrument
+MicrophoneInstrument --|> Instrument
+HuionInstrument --> HuionInputMapper
+HuionInputMapper --> TabletReading
+HuionInputMapper ..> SynthEvent
+Instrument o--> SynthCommand
+SynthCommand <|-- SaxophoneCommand
+SynthCommand <|-- ViolinCommand
+SynthCommand <|-- OrganCommand
+SaxophoneCommand --> OscClient
+ViolinCommand --> OscClient
+OrganCommand --> OscClient
+@enduml

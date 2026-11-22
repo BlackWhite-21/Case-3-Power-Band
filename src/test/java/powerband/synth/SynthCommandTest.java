@@ -9,6 +9,8 @@ import static powerband.util.IConstants.ACTION_PLAY;
 import static powerband.util.IConstants.SYNTH_BASS_ID;
 import static powerband.util.IConstants.SYNTH_ORGAN_ID;
 import static powerband.util.IConstants.SYNTH_PIANO_ID;
+import static powerband.util.IConstants.SYNTH_SAXOPHONE_ID;
+import static powerband.util.IConstants.SYNTH_VIOLIN_ID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,12 +73,45 @@ class SynthCommandTest {
     }
 
     @Test
+    void saxophoneUpdatesAmplitudeWithoutRetriggeringAndStopsWithGate() throws Exception {
+        SaxophoneCommand saxophone = new SaxophoneCommand(client);
+        saxophone.execute(event(SYNTH_SAXOPHONE_ID, ACTION_ON, 60));
+        assertTrue(transport.lastAsText().contains("saxophone"));
+        assertEquals(1, transport.getSent().size());
+
+        saxophone.execute(new SynthEvent(0, SYNTH_SAXOPHONE_ID, ACTION_ON,
+                60, 0, 0.9f, 0f, 0f, 0f));
+        assertTrue(transport.lastAsText().startsWith("/n_set"));
+        assertEquals(2, transport.getSent().size());
+
+        saxophone.execute(event(SYNTH_SAXOPHONE_ID, ACTION_OFF, 60));
+        assertTrue(transport.lastAsText().startsWith("/n_set"));
+        assertTrue(transport.lastAsText().contains("gate"));
+    }
+
+    @Test
+    void violinStartsAndStopsSustainedNote() throws Exception {
+        ViolinCommand violin = new ViolinCommand(client);
+        violin.execute(event(SYNTH_VIOLIN_ID, ACTION_ON, 69));
+        assertTrue(transport.lastAsText().contains("violin"));
+
+        violin.execute(event(SYNTH_VIOLIN_ID, ACTION_OFF, 69));
+        assertTrue(transport.lastAsText().startsWith("/n_set"));
+        assertTrue(transport.lastAsText().contains("gate"));
+    }
+
+    @Test
     void registryRoutesEventBySynthId() throws Exception {
         SynthCommandRegistry registry = new SynthCommandRegistry();
         registry.register(new PianoCommand(client));
         registry.register(new BassCommand(client));
+        registry.register(new OrganCommand(client));
+        registry.register(new SaxophoneCommand(client));
+        registry.register(new ViolinCommand(client));
         registry.execute(event(SYNTH_BASS_ID, ACTION_PLAY, 40));
         assertTrue(transport.lastAsText().contains("stringBass"));
+        registry.execute(event(SYNTH_VIOLIN_ID, ACTION_ON, 69));
+        assertTrue(transport.lastAsText().contains("violin"));
         assertThrows(SynthException.class, () -> registry.get(99));
     }
 
