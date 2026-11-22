@@ -14,7 +14,7 @@ Programa de creación musical: tres dispositivos físicos tocan tres sintetizado
 
 | Herramienta | Versión | Verificar |
 |---|---|---|
-| JDK | 22 o superior (el curso usa 26) | `java -version` |
+| JDK | 25 o superior (LTS) | `java -version` |
 | Apache Maven | 3.9 o superior | `mvn -version` |
 | SuperCollider | 3.13 o superior | https://supercollider.github.io/downloads.html |
 | Sistema | Windows (el joystick usa `winmm.dll`) | |

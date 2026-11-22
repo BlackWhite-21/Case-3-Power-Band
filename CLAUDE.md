@@ -10,7 +10,7 @@ El programa tiene tres partes:
 3. Editor musical: monitorea todos los comandos que los instrumentos envían a SuperCollider, graba, carga y reproduce música.
 
 # Tech stack
-- Java 22 o superior (se usa la API Foreign Function & Memory para leer el joystick desde `winmm.dll`).
+- Java 25 o superior (LTS; se usa la API Foreign Function & Memory para leer el joystick desde `winmm.dll`).
 - Maven project. Sin `src/main/java` alternativo.
 - Java Swing para la UI del editor.
 - `javax.sound.sampled` para capturar audio desde el micrófono predeterminado del sistema.

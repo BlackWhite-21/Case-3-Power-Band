@@ -117,7 +117,7 @@ end note
 
 ## Implementation guidelines
 
-- Java 22+, Maven y JNA; usar `Native.getComponentID` de JNA para obtener el HWND del `Window` Swing. No depender de APIs internas/reflexión de `sun.awt`.
+- Java 25+, Maven y JNA; usar `Native.getComponentID` de JNA para obtener el HWND del `Window` Swing. No depender de APIs internas/reflexión de `sun.awt`.
 - Ubicar la API Java en `src/main/java/powerband/instrument/`, `DatosTableta` en `src/main/java/powerband/dto/`, excepciones en `src/main/java/powerband/exception/` y constantes Java en `src/main/java/powerband/util/IConstants.java`.
 - No agregar `src/main/native`, JNI, C++ ni DLL propia. Declarar las llamadas a User32 y las estructuras Windows con JNA.
 - Instalar un hook de mensajes de hilo con JNA y filtrar `WM_POINTER*` del HWND Swing asociado. El callback captura datos y una instantánea breve de geometría Swing en el EDT, los encola y deja el mapeo final y las notificaciones al worker Java.

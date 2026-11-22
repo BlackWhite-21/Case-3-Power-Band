@@ -80,7 +80,7 @@ Esta sección no agrega requisitos nuevos; precisa puntos que la descripción de
 - Se espera que cuente con un ambiente de desarrollo configurado para IA y con la versión resumida de *spec driven development*.
 
 # Copilot project instructions
-Use Java only. JDK 22 o superior (el curso usa 26.0.2), Maven project, Java Swing for the UI. Use `javax.sound.sampled` to capture audio from the system's default microphone. Use JUnit 5 for unit testing. Use GitHub for source control and code repository.
+Use Java only. JDK 25 o superior (LTS), Maven project, Java Swing for the UI. Use `javax.sound.sampled` to capture audio from the system's default microphone. Use JUnit 5 for unit testing. Use GitHub for source control and code repository.
 
 Instrument-to-synth mapping:
 - USB joystick/controller → `organ70s`.

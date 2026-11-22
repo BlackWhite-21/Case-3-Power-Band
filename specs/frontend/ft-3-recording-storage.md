@@ -95,7 +95,7 @@ UI --> Usuario: Confirmar guardado
 
 ## Implementation guidelines
 
-- Java 22+, Maven y Swing; usar las constantes de `src/main/java/powerband/util/IConstants.java`.
+- Java 25+, Maven y Swing; usar las constantes de `src/main/java/powerband/util/IConstants.java`.
 - Integrar la ventana/editor en `src/main/java/powerband/ui/`; delegar captura y persistencia a `src/main/java/powerband/service/`.
 - Mantener los eventos de los instrumentos (`src/main/java/powerband/instrument/`) conectados al editor mientras la grabación está activa.
 - Aplicar las convenciones del proyecto: parámetros con prefijo `p`, campos encapsulados y excepciones explícitas.

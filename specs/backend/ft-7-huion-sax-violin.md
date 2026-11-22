@@ -119,7 +119,7 @@ OrganCommand --> OscClient
 
 ## Implementation guidelines
 
-- Java 22+, Maven y librería estándar; no agregar OpenCV ni otra dependencia salvo que la API del hardware lo requiera y se justifique.
+- Java 25+, Maven y librería estándar; no agregar OpenCV ni otra dependencia salvo que la API del hardware lo requiera y se justifique.
 - Implementar instrumentos en `src/main/java/powerband/instrument/`, DTOs en `src/main/java/powerband/dto/`, comandos en `src/main/java/powerband/synth/`, constantes en `src/main/java/powerband/util/IConstants.java` y errores propios en `src/main/java/powerband/exception/`.
 - Actualizar `src/main/java/powerband/osc/OscClient.java` para enviar valores float con `/n_set`, de forma que la presión pueda variar el volumen de una nota sostenida.
 - Asignar IDs nuevos al saxofón y al violín; preservar los IDs de piano, bajo y órgano porque los recordings los almacenan.

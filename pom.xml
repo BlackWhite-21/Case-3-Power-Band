@@ -12,8 +12,8 @@
     <name>Power Band</name>
 
     <properties>
-        <!-- 22 o superior: API Foreign Function & Memory (joystick por winmm.dll) -->
-        <maven.compiler.release>22</maven.compiler.release>
+        <!-- API Foreign Function & Memory (joystick por winmm.dll) -->
+        <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>powerband.Main</mainClass>
     </properties>

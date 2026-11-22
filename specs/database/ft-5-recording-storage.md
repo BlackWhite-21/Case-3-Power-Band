@@ -99,7 +99,7 @@ UI --> Usuario: Confirmar guardado
 
 ## Implementation guidelines
 
-- Java 22+, Maven; persistencia, búsqueda y ordenamiento en `src/main/java/powerband/repository/`.
+- Java 25+, Maven; persistencia, búsqueda y ordenamiento en `src/main/java/powerband/repository/`.
 - Usar `src/main/java/powerband/util/IConstants.java` para tamaños, nombres de archivo, relleno, tipos de registro y parámetros de ordenamiento.
 - Serializar encabezados y comandos como registros de `MUSIC_RECORD_SIZE` bytes; serializar el índice como `INDEX_RECORD_SIZE` bytes. Mantener el orden de bytes fijo y compatible entre lectura y escritura.
 - Conservar `recordings.music` como encabezado seguido por comandos; el offset final del encabezado es exclusivo.

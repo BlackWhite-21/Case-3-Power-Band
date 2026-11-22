@@ -13,7 +13,7 @@ status: approved
 
 ## Inputs
 
-- JDK 22+ x64.
+- JDK 25+ x64.
 - Dependencia Maven `jna` 5.17.0.
 - Maven y `pom.xml`.
 

@@ -96,7 +96,7 @@ UI --> Usuario: Confirmar guardado
 
 ## Implementation guidelines
 
-- Java 22+, Maven; lógica en `src/main/java/powerband/service/` y datos de entrada/salida en `src/main/java/powerband/dto/`.
+- Java 25+, Maven; lógica en `src/main/java/powerband/service/` y datos de entrada/salida en `src/main/java/powerband/dto/`.
 - Reutilizar `SynthEvent`, `RecordingInfo` y las excepciones existentes en `src/main/java/powerband/exception/`.
 - Validar nombres con `NAME_LENGTH`, `NAME_PATTERN` y los mensajes de `src/main/java/powerband/util/IConstants.java`; no duplicar constantes.
 - Medir intervalos con reloj monotónico y `NANOS_PER_MILLI`; no calcular el tiempo relativo con la fecha/hora del sistema.
