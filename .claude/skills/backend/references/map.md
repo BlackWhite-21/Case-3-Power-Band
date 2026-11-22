@@ -192,7 +192,7 @@ Package-private JNA implementation using a thread message hook and Windows Point
 - `attach(Component pComponent): void` — installs the hook for the Swing window on the EDT.
 - `pollEvent(int pTimeoutMs): DatosTableta` — waits for queued pointer data and maps its coordinates/state.
 - `requestStop(): void` — prevents further pointer events from being queued.
-- `detach(): void` — removes the hook and releases references.
+- `detach(): void` — removes the hook, waits for active callbacks, then releases the strongly held callback reference.
 
 ### PointerEventSource
 Package-private injectable source contract used by the adapter. `src/main/java/powerband/instrument/PointerEventSource.java`
