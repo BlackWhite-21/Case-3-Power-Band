@@ -5,9 +5,8 @@ After you change this layer, update this file so the next run stays current.
 Source: `src/main/java/powerband`
 
 ## Implemented
-- OSC encoder, UDP transport, client, legacy piano/bass/organ commands, synth registry, DTOs, exceptions, and constants in `src/main/java/powerband/`.
-- No `Main`, instrument implementation, service, recording repository, or Swing UI exists yet.
-- Empty placeholders only: `instrument/HuionInputMapper.java`, `synth/SaxophoneCommand.java`, and `synth/ViolinCommand.java`.
+- OSC encoder, UDP transport/client, Bridge synth commands, Huion mapping boundary, microphone capture/analyzer, DTOs, exceptions, and constants in `src/main/java/powerband/`.
+- No `Main`, recording service/repository, or Swing UI exists yet; Huion's driver-specific source must implement `HuionInputSource`.
 
 ## Entrypoints
 - Maven sets `powerband.Main` in `pom.xml`; `src/main/java/powerband/Main.java` is currently missing.
@@ -34,6 +33,7 @@ Creates synth nodes, sends controls, and checks server status. `src/main/java/po
 - `ping(): void` — checks the scsynth `/status` response.
 - `newSynth(String pDefName, Object... pControls): int` — creates a synth node and returns its node ID.
 - `setControl(int pNodeId, String pName, int pValue): void` — sends an integer control update.
+- `setControl(int pNodeId, String pName, float pValue): void` — updates a floating-point synth control.
 - `close(): void` — closes the OSC transport.
 
 ### SynthCommand
@@ -59,6 +59,20 @@ Sustained `organ70s` implementation with active node tracking. `src/main/java/po
 - `getSynthName(): String` — returns `organ70s`.
 - `stopAll(): void` — releases every active organ note.
 
+### GateSynthCommand
+Package-private base for gate-controlled saxophone and violin commands. `src/main/java/powerband/synth/GateSynthCommand.java`
+- `stopAll(): void` — releases all active notes.
+
+### SaxophoneCommand
+Sustained saxophone Bridge implementation. `src/main/java/powerband/synth/SaxophoneCommand.java`
+- `getSynthId(): int` — returns the saxophone ID.
+- `getSynthName(): String` — returns `saxophone`.
+
+### ViolinCommand
+Sustained violin Bridge implementation. `src/main/java/powerband/synth/ViolinCommand.java`
+- `getSynthId(): int` — returns the violin ID.
+- `getSynthName(): String` — returns `violin`.
+
 ### SynthCommandRegistry
 Routes synth events by ID. `src/main/java/powerband/synth/SynthCommandRegistry.java`
 - `register(SynthCommand pCommand): void` — registers a command by synth ID.
@@ -77,9 +91,9 @@ Normalized joystick axes and button bit mask. `src/main/java/powerband/dto/Joyst
 - `isPressed(int pButtonIndex): boolean` — checks the selected button bit.
 - Record accessors: `x(): float`, `y(): float`, `z(): float`, and `buttons(): int`.
 
-### MotionReading
-Legacy camera motion DTO; still present but no camera reader is implemented. `src/main/java/powerband/dto/MotionReading.java`
-- Record accessors: `amount(): float`, `x(): float`, and `y(): float`.
+### TabletReading
+Normalized Huion position and pressure. `src/main/java/powerband/dto/TabletReading.java`
+- Record accessors: `x(): float`, `y(): float`, and `pressure(): float`.
 
 ### RecordingInfo
 Recording-list row model. `src/main/java/powerband/dto/RecordingInfo.java`
@@ -116,4 +130,45 @@ Invalid recording-name failure. `src/main/java/powerband/exception/InvalidNameEx
 
 ### IConstants
 Shared OSC, synth, MIDI, device, persistence, playback, UI, and error constants. `src/main/java/powerband/util/IConstants.java`
-- Includes legacy camera constants; no methods are declared.
+- Contains new saxophone/violin IDs and Huion input constants; no methods are declared.
+
+### Instrument
+Bridge abstraction base that forwards synth events to its command and event listener. `src/main/java/powerband/instrument/Instrument.java`
+- No public methods are declared.
+
+### HuionInputSource
+Driver integration boundary for normalized tablet readings. `src/main/java/powerband/instrument/HuionInputSource.java`
+- `start(Consumer<TabletReading> pReadingConsumer): void` — starts publishing pen readings.
+- `stop(): void` — stops the device source.
+
+### HuionInputMapper
+Maps normalized tablet readings to MIDI notes and note-on/off events. `src/main/java/powerband/instrument/HuionInputMapper.java`
+- `map(TabletReading pReading): List<SynthEvent>` — maps one reading and updates active-note state.
+
+### HuionInstrument
+Connects a Huion source and mapper to a synth command. `src/main/java/powerband/instrument/HuionInstrument.java`
+- `start(): void` — subscribes to the input source.
+- `stop(): void` — stops the source and releases the active note.
+- `accept(TabletReading pReading): void` — dispatches events for one reading.
+
+### MicrophoneAudioSource
+Injectable PCM source abstraction. `src/main/java/powerband/instrument/MicrophoneAudioSource.java`
+- `open(): void` — opens the audio input.
+- `readFrame(): float[]` — returns a normalized mono PCM frame.
+- `close(): void` — releases the audio input.
+
+### DefaultMicrophoneAudioSource
+Java Sound target-line capture from the system default input. `src/main/java/powerband/instrument/DefaultMicrophoneAudioSource.java`
+- `open(): void` — opens and starts the default microphone line.
+- `readFrame(): float[]` — captures and normalizes one frame.
+- `close(): void` — closes the target line.
+
+### MicrophonePitchAnalyzer
+Estimates monophonic pitch and RMS velocity from PCM frames. `src/main/java/powerband/instrument/MicrophonePitchAnalyzer.java`
+- `processFrame(float[] pSamples): List<SynthEvent>` — returns note-on, note-off, or velocity update events.
+- `release(): List<SynthEvent>` — releases the active note once.
+
+### MicrophoneInstrument
+Captures frames and dispatches analyzed notes through the violin command. `src/main/java/powerband/instrument/MicrophoneInstrument.java`
+- `start(): void` — opens input and starts the capture worker.
+- `stop(): void` — closes input, waits for the worker, and releases active notes.
