@@ -36,6 +36,12 @@ Tablet-to-MIDI mapping tests. `src/test/java/powerband/instrument/HuionInputMapp
 ### HuionInstrumentTest
 Bridge and input source integration test with a fake source. `src/test/java/powerband/instrument/HuionInstrumentTest.java`
 - `dispatchesTabletEventsAndReleasesNoteWhenStopped(): void` — checks event and OSC dispatch without hardware.
+- `releasesActiveNoteAndReportsAsynchronousInputFailure(): void` — checks note release and device-error forwarding.
+
+### TabletaHuionInputSourceTest
+Swing tablet-to-instrument adapter tests with a fake pointer source. `src/test/java/powerband/instrument/TabletaHuionInputSourceTest.java`
+- `normalizesCoordinatesAndReleasesPressureWhenPenLeavesContact(): void` — checks coordinate normalization and pen-up behavior off the EDT.
+- `forwardsAsynchronousPointerFailures(): void` — checks pointer error delivery to the instrument boundary.
 
 ### PointerEventMapperTest
 Huion Pointer API event, coordinate, pressure, and state mapping tests. `src/test/java/powerband/instrument/PointerEventMapperTest.java`
@@ -54,6 +60,10 @@ Asynchronous adapter lifecycle and listener tests using a fake pointer source. `
 - `rejectsNonDisplayableComponentsAndRepeatedInitialization(): void` — checks lifecycle guards.
 - `rejectsUnsupportedOsBeforeLoadingWindowsApi(): void` — checks unsupported-platform handling.
 
+### JnaPointerStructureTest
+Windows Pointer API structure layout tests without loading User32. `src/test/java/powerband/instrument/JnaPointerStructureTest.java`
+- `nativeStructuresHaveConsistentFieldLayouts(): void` — checks JNA field orders, x64 structure sizes, and ABI offsets.
+
 ### MicrophonePitchAnalyzerTest
 PCM-to-violin pitch and velocity tests. `src/test/java/powerband/instrument/MicrophonePitchAnalyzerTest.java`
 - `mapsA4ToneAndRmsToSustainedViolinEvent(): void` — checks pitch and level conversion.
@@ -63,6 +73,23 @@ PCM-to-violin pitch and velocity tests. `src/test/java/powerband/instrument/Micr
 ### MicrophoneInstrumentTest
 Asynchronous instrument test with a blocking fake audio source. `src/test/java/powerband/instrument/MicrophoneInstrumentTest.java`
 - `usesInjectedAudioSourceAndDispatchesOnAndOffWithoutHardware(): void` — checks capture lifecycle and note events without a physical input.
+
+### BinaryRecordingRepositoryTest
+Binary files, search, index sorting, chronological list, and persistence-failure tests. `src/test/java/powerband/repository/BinaryRecordingRepositoryTest.java`
+- `writesFixedSizeHeaderCommandsIndexAndChronologicalList(): void` — checks fixed record sizes, serialized fields, and file contents.
+- `balancedMergeSortOrdersDiskIndexAndListKeepsRecordingOrder(): void` — checks disk-index order after each save and recording-order list.
+- `duplicateNameKeepsStoppedRecordingAvailableForRetry(): void` — checks duplicate rejection and retry.
+- `findsSavedRecordingAfterRepositoryIsReopened(): void` — checks persistent binary search with a new repository instance.
+- `failedListWriteDoesNotReportSuccessAndKeepsRecordingAvailableForRetry(): void` — checks rollback and retry after a list-file I/O failure.
+- `reportsMissingNamesAndRejectsBrokenMusicFile(): void` — checks not-found and I/O error reporting.
+
+### RecordingServiceTest
+Recording lifecycle, relative timing, and name-validation tests with an in-memory repository fake. `src/test/java/powerband/service/RecordingServiceTest.java`
+- `recordsMonotonicOffsetsInArrivalOrderAndIgnoresEventsAfterStop(): void` — checks event offsets and stop behavior.
+- `rejectsStartingAnotherRecordingUntilThePendingOneIsSaved(): void` — checks the pending-name lifecycle.
+- `rejectsInvalidAndDuplicateNamesButPreservesPendingRecordingForRetry(): void` — checks validation and retry behavior.
+- `rejectsEmptyAndOverlongNames(): void` — checks name bounds.
+- `rejectsStopAndSaveWithoutAnActiveOrPendingRecording(): void` — checks invalid lifecycle operations.
 
 ### FakeOscTransport
 Captures packets for tests. `src/test/java/powerband/helpers/FakeOscTransport.java`

@@ -5,8 +5,10 @@ After you change this layer, update this file so the next run stays current.
 Source: `src/main/java/powerband`
 
 ## Implemented
-- OSC encoder, UDP transport/client, Bridge synth commands, Huion mapping boundary, microphone capture/analyzer, DTOs, exceptions, and constants in `src/main/java/powerband/`.
-- No `Main`, recording service/repository, or Swing UI exists yet; Huion's driver-specific source must implement `HuionInputSource`.
+- OSC encoder, UDP transport/client, Bridge synth commands, Huion pointer-to-instrument adapter and mapper, microphone capture/analyzer, DTOs, exceptions, and constants in `src/main/java/powerband/`.
+- Recording event timing, name validation, and save coordination in `src/main/java/powerband/service/RecordingService.java`.
+- Binary persistence is in `src/main/java/powerband/repository/`; the recording UI is in `src/main/java/powerband/ui/`.
+- No `Main` or joystick instrument exists yet; the Huion pointer adapter is connected through `TabletaHuionInputSource`.
 
 ## Entrypoints
 - Maven sets `powerband.Main` in `pom.xml`; `src/main/java/powerband/Main.java` is currently missing.
@@ -146,8 +148,14 @@ Bridge abstraction base that forwards synth events to its command and event list
 
 ### HuionInputSource
 Driver integration boundary for normalized tablet readings. `src/main/java/powerband/instrument/HuionInputSource.java`
-- `start(Consumer<TabletReading> pReadingConsumer): void` — starts publishing pen readings.
+- `start(Consumer<TabletReading> pReadingConsumer, Consumer<DeviceException> pFailureConsumer): void` — starts publishing pen readings and asynchronous failures.
 - `stop(): void` — stops the device source.
+
+### TabletaHuionInputSource
+Adapts Swing tablet coordinates and pressure to normalized Huion readings. `src/main/java/powerband/instrument/TabletaHuionInputSource.java`
+- `TabletaHuionInputSource(Component pComponent)` — creates a JNA-backed tablet source for a Swing component.
+- `start(Consumer<TabletReading> pReadingConsumer, Consumer<DeviceException> pFailureConsumer): void` — initializes capture and publishes normalized readings and failures.
+- `stop(): void` — requests asynchronous tablet shutdown.
 
 ### HuionInputMapper
 Maps normalized tablet readings to MIDI notes and note-on/off events. `src/main/java/powerband/instrument/HuionInputMapper.java`
@@ -155,6 +163,7 @@ Maps normalized tablet readings to MIDI notes and note-on/off events. `src/main/
 
 ### HuionInstrument
 Connects a Huion source and mapper to a synth command. `src/main/java/powerband/instrument/HuionInstrument.java`
+- Constructors accept the source, synth command, event listener, and optionally a device-failure listener.
 - `start(): void` — subscribes to the input source.
 - `stop(): void` — stops the source and releases the active note.
 - `accept(TabletReading pReading): void` — dispatches events for one reading.
@@ -216,3 +225,13 @@ Estimates monophonic pitch and RMS velocity from PCM frames. `src/main/java/powe
 Captures frames and dispatches analyzed notes through the violin command. `src/main/java/powerband/instrument/MicrophoneInstrument.java`
 - `start(): void` — opens input and starts the capture worker.
 - `stop(): void` — closes input, waits for the worker, and releases active notes.
+
+### RecordingService
+Coordinates event capture, monotonic offsets, recording names, and repository finalization. `src/main/java/powerband/service/RecordingService.java`
+- Constructors accept a `RecordingRepository`; a second overload injects monotonic and wall clocks.
+- `startRecording(): void` — starts a capture and records wall-clock and monotonic start times.
+- `onSynthEvent(SynthEvent pEvent): void` — forwards an event with its elapsed recording offset.
+- `stopRecording(): void` — stops accepting events and leaves the capture pending for a name.
+- `saveRecording(String pName): RecordingInfo` — validates uniqueness and finalizes the pending recording.
+- `isRecording(): boolean` — reports whether event capture is active.
+- `hasPendingName(): boolean` — reports whether a stopped capture still needs a name.
