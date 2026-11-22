@@ -1,5 +1,5 @@
 ---
-id: ft-2
+id: ft-7
 layer: testing
 status: approved
 ---
@@ -34,7 +34,7 @@ status: approved
 
 ## Assets
 
-- Diagrama de clases de referencia: `../diagrams/ft-2-huion-sax-violin.puml`.
+- Diagrama de clases de referencia: `../diagrams/ft-7-huion-sax-violin.puml`.
 
 ## Implementation guidelines
 

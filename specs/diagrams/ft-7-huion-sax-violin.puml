@@ -1,5 +1,5 @@
-@startuml ft-2-huion-sax-violin
-title ft-2 - Instrumentos Huion y micrófono con synths
+@startuml ft-7-huion-sax-violin
+title ft-7 - Instrumentos Huion y micrófono con synths
 skinparam classAttributeIconSize 0
 hide empty members
 

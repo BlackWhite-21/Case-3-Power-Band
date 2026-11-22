@@ -1,5 +1,5 @@
 ---
-id: ft-2
+id: ft-7
 layer: backend
 status: approved
 ---
@@ -41,11 +41,11 @@ status: approved
 
 - Entrada física Huion detrás de una interfaz/adaptador que entregue coordenadas y presión normalizadas. El modelo y API/controlador Huion concretos no están definidos; mantenerlos aislados y no depender de emulación de mouse, que no proporciona la presión requerida.
 - Comandos OSC de los synths y parámetros exactos en `supercollider/myband.sc`.
-- Diagrama PlantUML `../diagrams/ft-2-huion-sax-violin.puml`:
+- Diagrama PlantUML `../diagrams/ft-7-huion-sax-violin.puml`:
 
 ```plantuml
-@startuml ft-2-huion-sax-violin
-title ft-2 - Instrumentos Huion y micrófono con synths
+@startuml ft-7-huion-sax-violin
+title ft-7 - Instrumentos Huion y micrófono con synths
 skinparam classAttributeIconSize 0
 hide empty members
 
