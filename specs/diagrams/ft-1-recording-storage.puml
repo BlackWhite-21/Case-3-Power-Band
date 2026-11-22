@@ -1,0 +1,57 @@
+@startuml
+actor Usuario
+participant "Editor Swing" as UI
+participant "Instrumentos" as Instruments
+participant RecordingService as Service
+participant RecordingRepository as Repo
+database "recordings.music" as Music
+database "recordings.index" as Index
+collections "recordings.list" as List
+participant BalancedMergeSort as Sort
+
+Usuario -> UI: Activar grabación
+UI -> Service: startRecording()
+Service -> Repo: beginRecording(startedAt)
+Repo -> Music: Escribir encabezado provisional
+
+loop Por cada SynthEvent recibido
+    Instruments -> Service: onSynthEvent(event)
+    Service -> Service: Calcular offset desde el inicio
+    Service -> Repo: appendEvent(event con offset)
+    Repo -> Music: Escribir comando binario fijo
+end
+
+Usuario -> UI: Terminar grabación
+UI -> Service: stopRecording()
+Service -> Repo: Cerrar captura pendiente
+UI -> Usuario: Solicitar nombre
+
+loop Hasta que el nombre sea válido y único
+    Usuario --> UI: nombre
+    UI -> Service: saveRecording(name)
+    Service -> Service: Validar nombre
+    alt Nombre inválido
+        Service --> UI: InvalidNameException
+        UI -> Usuario: Solicitar otro nombre
+    else Nombre válido
+        Service -> Repo: findByName(name)
+        Repo -> Index: Búsqueda binaria en disco
+        alt Nombre duplicado
+            Repo --> Service: DuplicateNameException
+            Service --> UI: DuplicateNameException
+            UI -> Usuario: Solicitar otro nombre
+        else Nombre disponible
+            Repo --> Service: Posición no encontrada
+        end
+    end
+end
+
+Service -> Repo: finalizeRecording(name, endOffset)
+Repo -> Music: Actualizar encabezado fijo
+Repo -> Index: Añadir nombre y posición del encabezado
+Repo -> Sort: Ordenar índice en disco
+Sort -> Index: Reemplazar por índice ordenado
+Repo -> List: Añadir nombre y fecha/hora
+Service --> UI: RecordingInfo
+UI --> Usuario: Confirmar guardado
+@enduml
