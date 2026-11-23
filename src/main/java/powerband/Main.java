@@ -23,6 +23,10 @@ import powerband.repository.BinaryRecordingRepository;
 import powerband.service.RecordingService;
 import powerband.synth.SaxophoneCommand;
 import powerband.synth.ViolinCommand;
+import powerband.synth.PianoCommand;
+import powerband.synth.BassCommand;
+import powerband.synth.OrganCommand;
+import powerband.synth.SynthCommandRegistry;
 import powerband.ui.RecordingEditorFrame;
 import powerband.util.IConstants;
 
@@ -38,18 +42,31 @@ public final class Main {
     }
 
     private static void startApplication() {
-        RecordingService pRecordingService =
-                new RecordingService(new BinaryRecordingRepository());
-        RecordingEditorFrame pFrame = new RecordingEditorFrame(pRecordingService);
         OscClient pOscClient;
         try {
             pOscClient = new OscClient(new UdpOscTransport(
                     IConstants.SC_DEFAULT_HOST,
                     IConstants.SC_DEFAULT_PORT));
         } catch (IOException pException) {
-            showError(pFrame, pException.getMessage());
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
+                    null,
+                    pException.getMessage(),
+                    IConstants.MSG_ERROR_TITLE,
+                    JOptionPane.ERROR_MESSAGE));
             return;
         }
+        SynthCommandRegistry pSynthRegistry = new SynthCommandRegistry();
+        pSynthRegistry.register(new PianoCommand(pOscClient));
+        pSynthRegistry.register(new BassCommand(pOscClient));
+        pSynthRegistry.register(new OrganCommand(pOscClient));
+        pSynthRegistry.register(new SaxophoneCommand(pOscClient));
+        pSynthRegistry.register(new ViolinCommand(pOscClient));
+        RecordingService pRecordingService = new RecordingService(
+                new BinaryRecordingRepository(),
+                System::nanoTime,
+                System::currentTimeMillis,
+                pSynthRegistry);
+        RecordingEditorFrame pFrame = new RecordingEditorFrame(pRecordingService);
 
         AtomicBoolean pShutdown = new AtomicBoolean();
         Object pInstrumentLifecycleLock = new Object();

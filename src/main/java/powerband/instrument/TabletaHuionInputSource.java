@@ -2,7 +2,6 @@ package powerband.instrument;
 
 import java.awt.Component;
 import java.util.Objects;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -56,17 +55,7 @@ public final class TabletaHuionInputSource implements HuionInputSource {
         running.set(true);
         tablet.addListener(listener);
         try {
-            tablet.initialize(component).whenComplete((pIgnored, pFailure) -> {
-                if (pFailure != null) {
-                    Throwable pCause = pFailure instanceof CompletionException && pFailure.getCause() != null
-                            ? pFailure.getCause()
-                            : pFailure;
-                    DeviceException pDeviceException = pCause instanceof DeviceException pDeviceFailure
-                            ? pDeviceFailure
-                            : new DeviceException(IConstants.ERR_HUION_POINTER_INITIALIZE, pCause);
-                    reportFailure(pDeviceException);
-                }
-            });
+            tablet.initialize(component);
         } catch (DeviceException | RuntimeException pException) {
             running.set(false);
             startAttempted.set(false);
@@ -84,18 +73,7 @@ public final class TabletaHuionInputSource implements HuionInputSource {
             return;
         }
         running.set(false);
-        tablet.closeAsync().whenComplete((pIgnored, pFailure) -> {
-            if (pFailure != null) {
-                Throwable pCause = pFailure instanceof CompletionException && pFailure.getCause() != null
-                        ? pFailure.getCause()
-                        : pFailure;
-                DeviceException pDeviceException = pCause instanceof DeviceException pDeviceFailure
-                        ? pDeviceFailure
-                        : new DeviceException(IConstants.ERR_HUION_POINTER_CLOSE, pCause);
-                reportFailure(pDeviceException);
-            }
-            tablet.removeListener(listener);
-        });
+        tablet.closeAsync();
     }
 
     private void publishReading(DatosTableta pData) {

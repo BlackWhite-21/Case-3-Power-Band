@@ -235,6 +235,7 @@ public interface IConstants {
     // ------------------------------------------------------------ Reproducción
     public static final int PLAYBACK_BUFFER_SIZE = 64;
     public static final long NANOS_PER_MILLI = 1_000_000L;
+    public static final String PLAYBACK_THREAD_NAME = "powerband-playback";
 
     // ------------------------------------------------------------ UI
     public static final String APP_TITLE = "Power Band - Editor musical";
@@ -308,4 +309,10 @@ public interface IConstants {
     public static final String ERR_NOTHING_LOADED = "Primero cargue una grabación.";
     public static final String ERR_UNKNOWN_RECORDING = "Error inesperado al guardar la grabación.";
     public static final String ERR_UNKNOWN_APPLICATION = "Error inesperado en Power Band.";
+    public static final String ERR_PLAYBACK_ACTIVE = "Ya se está reproduciendo una grabación.";
+    public static final String ERR_PLAYBACK_NOT_LOADED = "Primero cargue una grabación.";
+    public static final String ERR_PLAYBACK_LOAD_PENDING = "No puede cargarse o reproducirse durante una grabación.";
+    public static final String ERR_PLAYBACK_STOP = "No se pudo detener la reproducción.";
+    public static final String ERR_PLAYBACK_HEADER = "El encabezado de la grabación no es válido.";
+    public static final String ERR_LIST_LINE = "Una línea de recordings.list no es válida.";
 }

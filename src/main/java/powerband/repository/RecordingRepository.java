@@ -1,5 +1,8 @@
 package powerband.repository;
 
+import java.util.List;
+
+import powerband.dto.LoadedRecording;
 import powerband.dto.RecordingInfo;
 import powerband.dto.SynthEvent;
 import powerband.exception.RecordingException;
@@ -18,4 +21,12 @@ public interface RecordingRepository {
     boolean containsName(String pName) throws RecordingException;
 
     long findHeaderPosition(String pName) throws RecordingException, RecordingNotFoundException;
+
+    List<RecordingInfo> listRecordings() throws RecordingException;
+
+    LoadedRecording loadRecording(String pName)
+            throws RecordingException, RecordingNotFoundException;
+
+    List<SynthEvent> readCommands(long pStartOffset, long pEndOffset)
+            throws RecordingException;
 }
