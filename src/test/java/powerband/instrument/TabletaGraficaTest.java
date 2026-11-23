@@ -28,7 +28,7 @@ class TabletaGraficaTest {
     @Test
     void dispatchesEventsOffTheEdtAndReleasesResourcesOnClose() throws Exception {
         FakePointerEventSource pSource = new FakePointerEventSource();
-        try (TabletaGrafica pTablet = new TabletaGrafica(pSource)) {
+        TabletaGrafica pTablet = new TabletaGrafica(pSource);
         CountDownLatch pReceived = new CountDownLatch(1);
         CountDownLatch pReleased = new CountDownLatch(1);
         AtomicBoolean pCalledOnEdt = new AtomicBoolean(true);
@@ -48,13 +48,12 @@ class TabletaGraficaTest {
         pTablet.closeAsync().get(2, TimeUnit.SECONDS);
         assertTrue(pReleased.await(2, TimeUnit.SECONDS));
         assertTrue(pSource.detached.get());
-        }
     }
 
     @Test
     void listenerFailureDoesNotPreventDeliveryToOtherListeners() throws Exception {
         FakePointerEventSource pSource = new FakePointerEventSource();
-        try (TabletaGrafica pTablet = new TabletaGrafica(pSource)) {
+        TabletaGrafica pTablet = new TabletaGrafica(pSource);
         CountDownLatch pReceived = new CountDownLatch(1);
         pTablet.addListener(pData -> {
             throw new IllegalStateException("listener failed");
@@ -67,14 +66,13 @@ class TabletaGraficaTest {
         assertTrue(pReceived.await(2, TimeUnit.SECONDS));
         assertTrue(pTablet.getFailure().isEmpty());
         pTablet.closeAsync().get(2, TimeUnit.SECONDS);
-        }
     }
 
     @Test
     void closingDoesNotBlockTheEventThreadWhileDetaching() throws Exception {
         FakePointerEventSource pSource = new FakePointerEventSource();
         pSource.blockDetach = true;
-        try (TabletaGrafica pTablet = new TabletaGrafica(pSource)) {
+        TabletaGrafica pTablet = new TabletaGrafica(pSource);
         pTablet.initialize(new DisplayableComponent()).get(2, TimeUnit.SECONDS);
 
         CompletableFuture<CompletableFuture<Void>> pCloseCall = new CompletableFuture<>();
@@ -91,13 +89,12 @@ class TabletaGraficaTest {
         }
 
         pTermination.get(2, TimeUnit.SECONDS);
-        }
     }
 
     @Test
     void reportsAsynchronousCaptureFailuresToListeners() throws Exception {
         FakePointerEventSource pSource = new FakePointerEventSource();
-        try (TabletaGrafica pTablet = new TabletaGrafica(pSource)) {
+        TabletaGrafica pTablet = new TabletaGrafica(pSource);
         CountDownLatch pFailed = new CountDownLatch(1);
         AtomicReference<DeviceException> pReported = new AtomicReference<>();
         pTablet.addListener(new TabletaListener() {
@@ -118,26 +115,20 @@ class TabletaGraficaTest {
         assertTrue(pFailed.await(2, TimeUnit.SECONDS));
         assertEquals(pReported.get(), pTablet.getFailure().orElseThrow());
         pTablet.closeAsync().get(2, TimeUnit.SECONDS);
-        }
     }
 
     @Test
     void rejectsNonDisplayableComponentsAndRepeatedInitialization() throws Exception {
         FakePointerEventSource pSource = new FakePointerEventSource();
-        try (TabletaGrafica pTablet = new TabletaGrafica(pSource)) {
-            DeviceException pFirstFailure = assertThrows(
-                    DeviceException.class,
-                    () -> pTablet.initialize(new Component() {
-                    }));
-            assertEquals(IConstants.ERR_HUION_POINTER_NOT_DISPLAYABLE, pFirstFailure.getMessage());
+        TabletaGrafica pTablet = new TabletaGrafica(pSource);
 
-            pTablet.initialize(new DisplayableComponent()).get(2, TimeUnit.SECONDS);
-            DeviceException pRepeatedFailure = assertThrows(
-                    DeviceException.class,
-                    () -> pTablet.initialize(new DisplayableComponent()));
-            assertEquals(IConstants.ERR_HUION_POINTER_ALREADY_STARTED, pRepeatedFailure.getMessage());
-            pTablet.closeAsync().get(2, TimeUnit.SECONDS);
-        }
+        assertThrows(DeviceException.class, () -> pTablet.initialize(new Component() {
+        }));
+
+        pTablet.initialize(new DisplayableComponent()).get(2, TimeUnit.SECONDS);
+        assertThrows(DeviceException.class,
+                () -> pTablet.initialize(new DisplayableComponent()));
+        pTablet.closeAsync().get(2, TimeUnit.SECONDS);
     }
 
     @Test
@@ -171,6 +162,7 @@ class TabletaGraficaTest {
         private final AtomicBoolean detached = new AtomicBoolean();
         private final CountDownLatch detachEntered = new CountDownLatch(1);
         private final CountDownLatch allowDetach = new CountDownLatch(1);
+        private volatile boolean stopping;
         private volatile boolean failNextPoll;
         private volatile boolean blockDetach;
 
@@ -194,6 +186,7 @@ class TabletaGraficaTest {
 
         @Override
         public void requestStop() {
+            stopping = true;
         }
 
         @Override

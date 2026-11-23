@@ -21,7 +21,6 @@ import java.util.Objects;
 
 import powerband.dto.RecordingInfo;
 import powerband.dto.SynthEvent;
-import powerband.dto.LoadedRecording;
 import powerband.exception.DuplicateNameException;
 import powerband.exception.RecordingException;
 import powerband.exception.RecordingNotFoundException;
@@ -227,7 +226,6 @@ public final class BinaryRecordingRepository implements RecordingRepository {
     public synchronized List<RecordingInfo> listRecordings() throws RecordingException {
         Path pListPath = dataDirectory.resolve(IConstants.LIST_FILE);
         if (!Files.exists(pListPath)) {
-<<<<<<< HEAD
             return List.of();
         }
         try {
@@ -245,31 +243,12 @@ public final class BinaryRecordingRepository implements RecordingRepository {
                         pFields[IConstants.LIST_FIELDS - 1]));
             }
             return List.copyOf(pRecordings);
-=======
-            return new ArrayList<>();
-        }
-        try {
-            List<RecordingInfo> pRecordings = new ArrayList<>();
-            List<String> pLines = Files.readAllLines(pListPath, StandardCharsets.UTF_8);
-            for (String pLine : pLines) {
-                if (pLine.isBlank()) {
-                    continue;
-                }
-                String[] pFields = pLine.split(IConstants.LIST_SEPARATOR_REGEX, IConstants.LIST_FIELDS);
-                if (pFields.length != IConstants.LIST_FIELDS) {
-                    throw new RecordingException(IConstants.ERR_LIST_LINE);
-                }
-                pRecordings.add(new RecordingInfo(pFields[0], pFields[1]));
-            }
-            return pRecordings;
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
         } catch (IOException pException) {
             throw new RecordingException(IConstants.ERR_LIST_IO, pException);
         }
     }
 
     @Override
-<<<<<<< HEAD
     public synchronized List<SynthEvent> readEvents(String pName)
             throws RecordingException, RecordingNotFoundException {
         long pHeaderPosition = findHeaderPosition(pName);
@@ -302,40 +281,12 @@ public final class BinaryRecordingRepository implements RecordingRepository {
                 pCommandOffset += IConstants.MUSIC_RECORD_SIZE;
             }
             return List.copyOf(pEvents);
-=======
-    public synchronized LoadedRecording loadRecording(String pName)
-            throws RecordingException, RecordingNotFoundException {
-        Objects.requireNonNull(pName);
-        long pHeaderPosition = findHeaderPosition(pName);
-        Path pMusicPath = dataDirectory.resolve(IConstants.MUSIC_FILE);
-        try (RandomAccessFile pMusic = new RandomAccessFile(pMusicPath.toFile(), IConstants.FILE_MODE_R)) {
-            if (pHeaderPosition < IConstants.ZERO_LONG
-                    || pHeaderPosition % IConstants.MUSIC_RECORD_SIZE != IConstants.ZERO_LONG
-                    || pHeaderPosition >= pMusic.length()) {
-                throw new RecordingException(IConstants.ERR_PLAYBACK_HEADER);
-            }
-            pMusic.seek(pHeaderPosition);
-            RecordingFileFormat.HeaderEntry pHeader = RecordingFileFormat.readHeader(pMusic);
-            if (!pHeader.name().equals(pName)
-                    || pHeader.startOffset() != pHeaderPosition
-                    || pHeader.endOffset() < pHeaderPosition + IConstants.MUSIC_RECORD_SIZE
-                    || pHeader.endOffset() > pMusic.length()
-                    || pHeader.endOffset() % IConstants.MUSIC_RECORD_SIZE != IConstants.ZERO_LONG) {
-                throw new RecordingException(IConstants.ERR_PLAYBACK_HEADER);
-            }
-            return new LoadedRecording(
-                    pHeader.name(),
-                    pHeader.startOffset(),
-                    pHeader.endOffset(),
-                    pHeader.recordedAtEpochMillis());
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
         } catch (IOException pException) {
             throw new RecordingException(IConstants.ERR_MUSIC_IO, pException);
         }
     }
 
     @Override
-<<<<<<< HEAD
     public synchronized RecordingInfo saveCopy(
             String pName,
             List<SynthEvent> pEvents,
@@ -388,34 +339,6 @@ public final class BinaryRecordingRepository implements RecordingRepository {
             truncateMusic(pMusicPath, pOriginalMusicLength, pRecordingException);
             resetPendingRecording();
             throw pRecordingException;
-=======
-    public synchronized List<SynthEvent> readCommands(long pStartOffset, long pEndOffset)
-            throws RecordingException {
-        if (pStartOffset < IConstants.ZERO_LONG
-                || pEndOffset < pStartOffset
-                || pStartOffset % IConstants.MUSIC_RECORD_SIZE != IConstants.ZERO_LONG
-                || pEndOffset % IConstants.MUSIC_RECORD_SIZE != IConstants.ZERO_LONG) {
-            throw new RecordingException(IConstants.ERR_MUSIC_IO);
-        }
-        Path pMusicPath = dataDirectory.resolve(IConstants.MUSIC_FILE);
-        try (RandomAccessFile pMusic = new RandomAccessFile(pMusicPath.toFile(), IConstants.FILE_MODE_R)) {
-            if (pEndOffset > pMusic.length()) {
-                throw new RecordingException(IConstants.ERR_MUSIC_IO);
-            }
-            pMusic.seek(pStartOffset);
-            List<SynthEvent> pEvents = new ArrayList<>(IConstants.PLAYBACK_BUFFER_SIZE);
-            while (pMusic.getFilePointer() < pEndOffset
-                    && pEvents.size() < IConstants.PLAYBACK_BUFFER_SIZE) {
-                SynthEvent pEvent = RecordingFileFormat.readCommand(pMusic);
-                pEvents.add(pEvent);
-                pMusic.seek(pMusic.getFilePointer()
-                        + IConstants.MUSIC_RECORD_SIZE
-                        - IConstants.MUSIC_COMMAND_FIXED_BYTES);
-            }
-            return pEvents;
-        } catch (IOException pException) {
-            throw new RecordingException(IConstants.ERR_MUSIC_IO, pException);
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
         }
     }
 

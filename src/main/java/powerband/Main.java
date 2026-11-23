@@ -27,10 +27,6 @@ import powerband.synth.PianoCommand;
 import powerband.synth.SaxophoneCommand;
 import powerband.synth.SynthCommandRegistry;
 import powerband.synth.ViolinCommand;
-import powerband.synth.PianoCommand;
-import powerband.synth.BassCommand;
-import powerband.synth.OrganCommand;
-import powerband.synth.SynthCommandRegistry;
 import powerband.ui.RecordingEditorFrame;
 import powerband.util.IConstants;
 
@@ -46,17 +42,13 @@ public final class Main {
     }
 
     private static void startApplication() {
-<<<<<<< HEAD
         BinaryRecordingRepository pRepository = new BinaryRecordingRepository();
-=======
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
         OscClient pOscClient;
         try {
             pOscClient = new OscClient(new UdpOscTransport(
                     IConstants.SC_DEFAULT_HOST,
                     IConstants.SC_DEFAULT_PORT));
         } catch (IOException pException) {
-<<<<<<< HEAD
             startEditorWithoutSynthServer(pRepository, pException);
             return;
         }
@@ -71,26 +63,6 @@ public final class Main {
         pSynthCommandRegistry.register(pViolinCommand);
         RecordingService pRecordingService =
                 new RecordingService(pRepository, pSynthCommandRegistry);
-=======
-            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
-                    null,
-                    pException.getMessage(),
-                    IConstants.MSG_ERROR_TITLE,
-                    JOptionPane.ERROR_MESSAGE));
-            return;
-        }
-        SynthCommandRegistry pSynthRegistry = new SynthCommandRegistry();
-        pSynthRegistry.register(new PianoCommand(pOscClient));
-        pSynthRegistry.register(new BassCommand(pOscClient));
-        pSynthRegistry.register(new OrganCommand(pOscClient));
-        pSynthRegistry.register(new SaxophoneCommand(pOscClient));
-        pSynthRegistry.register(new ViolinCommand(pOscClient));
-        RecordingService pRecordingService = new RecordingService(
-                new BinaryRecordingRepository(),
-                System::nanoTime,
-                System::currentTimeMillis,
-                pSynthRegistry);
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
         RecordingEditorFrame pFrame = new RecordingEditorFrame(pRecordingService);
 
         AtomicBoolean pShutdown = new AtomicBoolean();

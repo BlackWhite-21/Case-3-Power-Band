@@ -257,37 +257,6 @@ class BinaryRecordingRepositoryTest {
         assertEquals(ERR_MUSIC_IO, pException.getMessage());
     }
 
-    @Test
-    void listsLoadsAndReadsCommandsWithoutLeavingRecordingBounds() throws Exception {
-        long pRecordedAt = Instant.parse("2026-11-22T18:00:00Z").toEpochMilli();
-        SynthEvent pEvent = new SynthEvent(
-                125,
-                SYNTH_SAXOPHONE_ID,
-                ACTION_ON,
-                60,
-                ZERO_INT,
-                0.75f,
-                0.1f,
-                0.2f,
-                0.3f);
-        repository.beginRecording(pRecordedAt);
-        repository.appendEvent(pEvent);
-        repository.stopRecording();
-        RecordingInfo pInfo = repository.finalizeRecording("reproducible");
-
-        assertEquals(
-                List.of(pInfo),
-                repository.listRecordings());
-        powerband.dto.LoadedRecording pLoaded =
-                repository.loadRecording("reproducible");
-        assertEquals("reproducible", pLoaded.name());
-        assertEquals(ZERO_LONG, pLoaded.headerPosition());
-        assertEquals((long) MUSIC_RECORD_SIZE * MERGE_TAPES, pLoaded.endOffset());
-        assertEquals(
-                List.of(pEvent),
-                repository.readCommands(MUSIC_RECORD_SIZE, pLoaded.endOffset()));
-    }
-
     private RecordingInfo saveRecording(String pName) throws Exception {
         repository.beginRecording(Instant.now().toEpochMilli());
         repository.stopRecording();

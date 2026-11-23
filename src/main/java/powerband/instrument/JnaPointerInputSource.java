@@ -112,10 +112,6 @@ final class JnaPointerInputSource implements PointerEventSource {
         hookHandle = pHookHandle;
     }
 
-    PointerHook getHookProcedure() {
-        return hookProcedure;
-    }
-
     @Override
     public DatosTableta pollEvent(int pTimeoutMs) throws DeviceException {
         try {

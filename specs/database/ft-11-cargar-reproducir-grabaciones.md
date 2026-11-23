@@ -1,7 +1,7 @@
 ---
 id: ft-11
 layer: database
-status: approved
+status: draft
 ---
 
 # Lectura y reproducción binaria de grabaciones

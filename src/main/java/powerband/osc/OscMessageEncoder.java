@@ -52,11 +52,12 @@ public class OscMessageEncoder {
     }
 
     private void writeArgument(DataOutputStream pOut, Object pArg) throws IOException {
-        switch (pArg) {
-            case Integer value -> pOut.writeInt(value);
-            case Float value -> pOut.writeFloat(value);
-            case String value -> writePaddedString(pOut, value);
-            default -> throw new IllegalArgumentException(ERR_OSC_TYPE + pArg);
+        if (pArg instanceof Integer value) {
+            pOut.writeInt(value);           // DataOutputStream escribe big-endian, como pide OSC
+        } else if (pArg instanceof Float value) {
+            pOut.writeFloat(value);
+        } else {
+            writePaddedString(pOut, (String) pArg);
         }
     }
 

@@ -99,7 +99,6 @@ Binary files, search, index sorting, chronological list, and persistence-failure
 - `findsSavedRecordingAfterRepositoryIsReopened(): void` — checks persistent binary search with a new repository instance.
 - `failedListWriteDoesNotReportSuccessAndKeepsRecordingAvailableForRetry(): void` — checks rollback and retry after a list-file I/O failure.
 - `reportsMissingNamesAndRejectsBrokenMusicFile(): void` — checks not-found and I/O error reporting.
-- `listsLoadsAndReadsCommandsWithoutLeavingRecordingBounds(): void` — checks chronological listing, header loading, and bounded command reads.
 
 ### RecordingServiceTest
 Recording lifecycle, pause timing, name validation, edited copies, and playback tests with an in-memory repository fake. `src/test/java/powerband/service/RecordingServiceTest.java`
@@ -109,7 +108,6 @@ Recording lifecycle, pause timing, name validation, edited copies, and playback 
 - `rejectsInvalidAndDuplicateNamesButPreservesPendingRecordingForRetry(): void` — checks validation and retry behavior.
 - `rejectsEmptyAndOverlongNames(): void` — checks name bounds.
 - `rejectsStopAndSaveWithoutAnActiveOrPendingRecording(): void` — checks invalid lifecycle operations.
-<<<<<<< HEAD
 - `discardsActiveOrPendingRecordingAndAllowsStartingAgain(): void` — checks discard resets the service lifecycle.
 - `loadsEventsAndSavesEditedCopyWithoutChangingSource(): void` — checks loading and immutable-copy persistence.
 - `keepsEditedEventsAvailableWhenCopyNameIsDuplicated(): void` — checks duplicate-name retry behavior.
@@ -121,10 +119,6 @@ Headless Swing branding, page-specific control structure, and editable timeline 
 - `showsTheThreeEditorPagesAndPowerBandBranding(): void` — checks page navigation labels and logo color.
 - `recordingControlsAreExclusiveToRecorderPage(): void` — checks Grabadora has only start/stop and pause/resume controls, with playback controls in Reproductor.
 - `timelineEditsChangeOnlyTheWorkingCopy(): void` — checks editable fields and source-event immutability.
-=======
-- `listsAndLoadsRecordingButRejectsPlaybackDuringCapture(): void` — checks listing/loading and capture restrictions.
-- `playbackStopsPendingEvents(): void` — checks interrupted playback without pending command execution.
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
 
 ### FakeOscTransport
 Captures packets for tests. `src/test/java/powerband/helpers/FakeOscTransport.java`

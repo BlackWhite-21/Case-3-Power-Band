@@ -1,7 +1,7 @@
 ---
 id: ft-11
 layer: testing
-status: approved
+status: draft
 ---
 
 # Pruebas de carga y reproducción

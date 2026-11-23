@@ -236,11 +236,7 @@ public interface IConstants {
     // ------------------------------------------------------------ Reproducción
     public static final int PLAYBACK_BUFFER_SIZE = 64;
     public static final long NANOS_PER_MILLI = 1_000_000L;
-<<<<<<< HEAD
     public static final long MAX_PLAYBACK_OFFSET_MS = Long.MAX_VALUE / NANOS_PER_MILLI;
-=======
-    public static final String PLAYBACK_THREAD_NAME = "powerband-playback";
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
 
     // ------------------------------------------------------------ UI
     public static final String APP_TITLE = "Power Band - Editor musical";
@@ -380,17 +376,8 @@ public interface IConstants {
     public static final String ERR_NOTHING_LOADED = "Primero cargue una grabación.";
     public static final String ERR_UNKNOWN_RECORDING = "Error inesperado al guardar la grabación.";
     public static final String ERR_UNKNOWN_APPLICATION = "Error inesperado en Power Band.";
-<<<<<<< HEAD
     public static final String ERR_RECORDING_BUSY = "Termine la grabación actual antes de realizar esta operación.";
     public static final String ERR_PLAYBACK_UNAVAILABLE = "El reproductor de sintetizadores no está configurado.";
     public static final String ERR_PLAYBACK_ACTIVE = "Ya hay una reproducción en curso.";
     public static final String ERR_INVALID_EDITED_RECORDING = "Los cambios contienen valores inválidos o tiempos desordenados.";
-=======
-    public static final String ERR_PLAYBACK_ACTIVE = "Ya se está reproduciendo una grabación.";
-    public static final String ERR_PLAYBACK_NOT_LOADED = "Primero cargue una grabación.";
-    public static final String ERR_PLAYBACK_LOAD_PENDING = "No puede cargarse o reproducirse durante una grabación.";
-    public static final String ERR_PLAYBACK_STOP = "No se pudo detener la reproducción.";
-    public static final String ERR_PLAYBACK_HEADER = "El encabezado de la grabación no es válido.";
-    public static final String ERR_LIST_LINE = "Una línea de recordings.list no es válida.";
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
 }

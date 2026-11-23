@@ -1,30 +1,20 @@
 package powerband.service;
 
-import java.util.List;
 import java.util.Objects;
-<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.locks.LockSupport;
-=======
-import java.util.function.Consumer;
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
 import java.util.function.LongSupplier;
 
-import powerband.dto.LoadedRecording;
 import powerband.dto.RecordingInfo;
 import powerband.dto.SynthEvent;
 import powerband.exception.DuplicateNameException;
 import powerband.exception.InvalidNameException;
-import powerband.exception.PowerBandException;
 import powerband.exception.RecordingException;
 import powerband.exception.RecordingNotFoundException;
-<<<<<<< HEAD
 import powerband.exception.SynthException;
-=======
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
 import powerband.repository.RecordingRepository;
 import powerband.synth.SynthCommandRegistry;
 import powerband.util.IConstants;
@@ -35,13 +25,10 @@ public final class RecordingService {
     private final SynthCommandRegistry synthCommandRegistry;
     private final LongSupplier monotonicClock;
     private final LongSupplier wallClock;
-    private final SynthCommandRegistry synthRegistry;
-    private final PlaybackWaiter playbackWaiter;
     private boolean recording;
     private boolean paused;
     private boolean pendingName;
     private long startedAtNanos;
-<<<<<<< HEAD
     private long pausedAtNanos;
     private long totalPausedNanos;
     private Thread playbackThread;
@@ -52,71 +39,24 @@ public final class RecordingService {
 
     public RecordingService(RecordingRepository pRepository, SynthCommandRegistry pSynthCommandRegistry) {
         this(pRepository, pSynthCommandRegistry, System::nanoTime, System::currentTimeMillis);
-=======
-    private LoadedRecording loadedRecording;
-    private volatile boolean playing;
-    private volatile boolean playbackStopping;
-    private volatile Thread playbackThread;
-    private volatile Consumer<PowerBandException> playbackListener;
-    private volatile Runnable playbackCompletionListener;
-
-    public RecordingService(RecordingRepository pRepository) {
-        this(
-                pRepository,
-                System::nanoTime,
-                System::currentTimeMillis,
-                new SynthCommandRegistry(),
-                pMillis -> Thread.sleep(pMillis));
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
     }
 
     public RecordingService(
             RecordingRepository pRepository,
             LongSupplier pMonotonicClock,
             LongSupplier pWallClock) {
-<<<<<<< HEAD
         this(pRepository, null, pMonotonicClock, pWallClock);
-=======
-        this(
-                pRepository,
-                pMonotonicClock,
-                pWallClock,
-                new SynthCommandRegistry(),
-                pMillis -> Thread.sleep(pMillis));
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
     }
 
     public RecordingService(
             RecordingRepository pRepository,
-<<<<<<< HEAD
             SynthCommandRegistry pSynthCommandRegistry,
             LongSupplier pMonotonicClock,
             LongSupplier pWallClock) {
-=======
-            LongSupplier pMonotonicClock,
-            LongSupplier pWallClock,
-            SynthCommandRegistry pSynthRegistry) {
-        this(
-                pRepository,
-                pMonotonicClock,
-                pWallClock,
-                pSynthRegistry,
-                pMillis -> Thread.sleep(pMillis));
-    }
-
-    public RecordingService(
-            RecordingRepository pRepository,
-            LongSupplier pMonotonicClock,
-            LongSupplier pWallClock,
-            SynthCommandRegistry pSynthRegistry,
-            PlaybackWaiter pPlaybackWaiter) {
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
         repository = Objects.requireNonNull(pRepository);
         synthCommandRegistry = pSynthCommandRegistry;
         monotonicClock = Objects.requireNonNull(pMonotonicClock);
         wallClock = Objects.requireNonNull(pWallClock);
-        synthRegistry = Objects.requireNonNull(pSynthRegistry);
-        playbackWaiter = Objects.requireNonNull(pPlaybackWaiter);
     }
 
     public synchronized void startRecording() throws RecordingException {
@@ -272,138 +212,6 @@ public final class RecordingService {
         return pendingName;
     }
 
-    public synchronized List<RecordingInfo> listRecordings() throws RecordingException {
-        return repository.listRecordings();
-    }
-
-    public synchronized LoadedRecording loadRecording(String pName)
-            throws RecordingException, RecordingNotFoundException {
-        if (recording || pendingName) {
-            throw new RecordingException(IConstants.ERR_PLAYBACK_LOAD_PENDING);
-        }
-        if (playing) {
-            throw new RecordingException(IConstants.ERR_PLAYBACK_ACTIVE);
-        }
-        LoadedRecording pLoadedRecording = repository.loadRecording(pName);
-        loadedRecording = pLoadedRecording;
-        return pLoadedRecording;
-    }
-
-    public synchronized void setPlaybackListener(Consumer<PowerBandException> pListener) {
-        playbackListener = Objects.requireNonNull(pListener);
-    }
-
-    public synchronized void setPlaybackCompletionListener(Runnable pListener) {
-        playbackCompletionListener = Objects.requireNonNull(pListener);
-    }
-
-    public synchronized LoadedRecording getLoadedRecording() {
-        return loadedRecording;
-    }
-
-    public synchronized boolean isPlaying() {
-        return playing;
-    }
-
-    public synchronized void playLoadedRecording() throws RecordingException {
-        if (recording || pendingName) {
-            throw new RecordingException(IConstants.ERR_PLAYBACK_LOAD_PENDING);
-        }
-        if (playing) {
-            throw new RecordingException(IConstants.ERR_PLAYBACK_ACTIVE);
-        }
-        LoadedRecording pLoadedRecording = loadedRecording;
-        if (pLoadedRecording == null) {
-            throw new RecordingException(IConstants.ERR_PLAYBACK_NOT_LOADED);
-        }
-        playbackStopping = false;
-        playing = true;
-        Thread pPlaybackThread = new Thread(
-                () -> reproduce(pLoadedRecording),
-                IConstants.PLAYBACK_THREAD_NAME);
-        pPlaybackThread.setDaemon(true);
-        playbackThread = pPlaybackThread;
-        pPlaybackThread.start();
-    }
-
-    public synchronized void stopPlayback() throws RecordingException {
-        if (!playing) {
-            return;
-        }
-        playbackStopping = true;
-        Thread pPlaybackThread = playbackThread;
-        if (pPlaybackThread != null) {
-            pPlaybackThread.interrupt();
-        }
-        if (pPlaybackThread != null && pPlaybackThread != Thread.currentThread()) {
-            try {
-                pPlaybackThread.join(IConstants.DEVICE_STOP_TIMEOUT_MS);
-            } catch (InterruptedException pException) {
-                Thread.currentThread().interrupt();
-                throw new RecordingException(IConstants.ERR_PLAYBACK_STOP, pException);
-            }
-        }
-        playing = false;
-        playbackThread = null;
-        synthRegistry.stopAll();
-    }
-
-    private void reproduce(LoadedRecording pLoadedRecording) {
-        long pCursor = pLoadedRecording.headerPosition() + IConstants.MUSIC_RECORD_SIZE;
-        long pPreviousOffset = IConstants.ZERO_LONG;
-        try {
-            while (!playbackStopping
-                    && pCursor < pLoadedRecording.endOffset()) {
-                List<SynthEvent> pEvents = repository.readCommands(
-                        pCursor,
-                        pLoadedRecording.endOffset());
-                if (pEvents.isEmpty()) {
-                    break;
-                }
-                for (SynthEvent pEvent : pEvents) {
-                    if (playbackStopping || Thread.currentThread().isInterrupted()) {
-                        return;
-                    }
-                    long pDelayMs = Math.max(
-                            IConstants.ZERO_LONG,
-                            pEvent.offsetMs() - pPreviousOffset);
-                    if (pDelayMs > IConstants.ZERO_LONG) {
-                        playbackWaiter.waitMs(pDelayMs);
-                    }
-                    if (playbackStopping || Thread.currentThread().isInterrupted()) {
-                        return;
-                    }
-                    synthRegistry.execute(pEvent);
-                    pPreviousOffset = pEvent.offsetMs();
-                }
-                pCursor += (long) pEvents.size() * IConstants.MUSIC_RECORD_SIZE;
-            }
-        } catch (InterruptedException pException) {
-            Thread.currentThread().interrupt();
-        } catch (PowerBandException pException) {
-            notifyPlaybackFailure(pException);
-        } finally {
-            playing = false;
-            playbackThread = null;
-            synthRegistry.stopAll();
-            notifyPlaybackCompletion();
-        }
-    }
-
-    private void notifyPlaybackCompletion() {
-        Runnable pListener = playbackCompletionListener;
-        if (pListener != null) {
-            pListener.run();
-        }
-    }
-
-    private void notifyPlaybackFailure(PowerBandException pException) {
-        Consumer<PowerBandException> pListener = playbackListener;
-        if (pListener != null) {
-            pListener.accept(pException);
-        }
-    }
-
     private String validateName(String pName) throws InvalidNameException {
         String pValue = pName == null ? IConstants.EMPTY_STRING : pName.strip();
         if (pValue.isEmpty()) {
@@ -418,7 +226,6 @@ public final class RecordingService {
         return pValue;
     }
 
-<<<<<<< HEAD
     private void ensureNoRecordingOperation() throws RecordingException {
         if (recording || pendingName) {
             throw new RecordingException(IConstants.ERR_RECORDING_BUSY);
@@ -519,11 +326,5 @@ public final class RecordingService {
             }
             pRemainingNanos = pTargetDelayNanos - (System.nanoTime() - pStartNanos);
         }
-=======
-    @FunctionalInterface
-    public interface PlaybackWaiter {
-
-        void waitMs(long pMillis) throws InterruptedException;
->>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
     }
 }
