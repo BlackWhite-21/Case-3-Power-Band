@@ -251,6 +251,7 @@ Coordinates event capture, monotonic offsets, recording names, and repository fi
 - `listRecordings(): List<RecordingInfo>` — reads the chronologically ordered recording list.
 - `loadRecording(String pName): LoadedRecording` — resolves and validates a recording for playback.
 - `setPlaybackListener(Consumer<PowerBandException> pListener): void` — registers asynchronous playback failures.
+- `setPlaybackCompletionListener(Runnable pListener): void` — registers natural playback completion.
 - `getLoadedRecording(): LoadedRecording` — returns the current loaded recording.
 - `isPlaying(): boolean` — reports playback activity.
 - `playLoadedRecording(): void` — starts timed buffered playback in a daemon thread.
