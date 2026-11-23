@@ -7,7 +7,8 @@ Source: `src/main/java/powerband`
 ## Implemented
 - OSC encoder, UDP transport/client, Bridge synth commands, Huion pointer-to-instrument adapter and mapper, microphone capture/analyzer, DTOs, exceptions, and constants in `src/main/java/powerband/`.
 - `Main` composes the recording service, playback registry for all five synths, Swing editor, OSC client, Huion saxophone instrument, and default-microphone violin instrument.
-- Recording capture, name validation, loading, edited-copy coordination, and asynchronous timed playback in `src/main/java/powerband/service/RecordingService.java`.
+- Recording capture, pause/resume timing, name validation, loading, edited-copy coordination, unsaved-capture discard, and asynchronous timed playback in `src/main/java/powerband/service/RecordingService.java`.
+- The microphone worker suppresses read/close errors caused by an intentional stop while still reporting failures during active capture.
 - Binary persistence is in `src/main/java/powerband/repository/`; the recording UI is in `src/main/java/powerband/ui/`.
 - No joystick instrument exists yet.
 
@@ -192,7 +193,7 @@ Receives tablet data and optional device failures. `src/main/java/powerband/inst
 - `onError(DeviceException pException): void` — receives an asynchronous capture error.
 
 ### JnaPointerInputSource
-Package-private JNA implementation using a thread message hook and Windows Pointer API, with an injectable API for lifecycle tests. `src/main/java/powerband/instrument/JnaPointerInputSource.java`
+Package-private JNA implementation using a thread message hook and Windows Pointer API, with an injectable API for lifecycle tests. Passes mutable `POINT` coordinates to `ScreenToClient` by reference. `src/main/java/powerband/instrument/JnaPointerInputSource.java`
 - `attach(Component pComponent): void` — installs the hook for the Swing window on the EDT.
 - `pollEvent(int pTimeoutMs): DatosTableta` — waits for queued pointer data and maps its coordinates/state.
 - `requestStop(): void` — prevents further pointer events from being queued.
@@ -207,7 +208,7 @@ Package-private injectable source contract used by the adapter. `src/main/java/p
 
 ### PointerEventMapper
 Package-private Windows-message and coordinate-to-DTO mapper. `src/main/java/powerband/instrument/PointerEventMapper.java`
-- `map(NativePointerEvent pEvent): DatosTableta` — validates pressure/coordinates and creates the normalized reading.
+- `map(NativePointerEvent pEvent): DatosTableta` — validates pressure only while the pen is in contact; pressure-free hover and release events produce zero pressure.
 
 ### NativePointerEvent
 Package-private immutable queue event with a Swing geometry snapshot. `src/main/java/powerband/instrument/NativePointerEvent.java`
@@ -233,14 +234,17 @@ Estimates monophonic pitch and RMS velocity from PCM frames. `src/main/java/powe
 ### MicrophoneInstrument
 Captures frames and dispatches analyzed notes through the violin command. `src/main/java/powerband/instrument/MicrophoneInstrument.java`
 - `start(): void` — opens input and starts the capture worker.
-- `stop(): void` — closes input, waits for the worker, and releases active notes.
+- `stop(): void` — closes input, waits for the worker, and releases active notes without reporting the expected read interruption as a device error.
 
 ### RecordingService
 Coordinates capture, monotonic offsets, recording names, loading, edited copies, and timed synth playback. `src/main/java/powerband/service/RecordingService.java`
 - Constructors accept a `RecordingRepository`, optional `SynthCommandRegistry`, and optional monotonic and wall clocks.
 - `startRecording(): void` — starts a capture and records wall-clock and monotonic start times.
+- `pauseRecording(): void` — suspends capture and excludes the paused interval from command offsets.
+- `resumeRecording(): void` — resumes capture and continues elapsed-time accumulation.
 - `onSynthEvent(SynthEvent pEvent): void` — forwards an event with its elapsed recording offset.
 - `stopRecording(): void` — stops accepting events and leaves the capture pending for a name.
+- `discardRecording(): void` — removes an active or unnamed recording and clears its pending state.
 - `saveRecording(String pName): RecordingInfo` — validates uniqueness and finalizes the pending recording.
 - `listRecordings(): List<RecordingInfo>` — returns recordings in chronological list-file order.
 - `loadRecording(String pName): List<SynthEvent>` — loads validated commands for one saved recording.
@@ -250,4 +254,5 @@ Coordinates capture, monotonic offsets, recording names, loading, edited copies,
 - `isPlaying(): boolean` — reports whether playback is active.
 - `synthName(int pSynthId): String` — resolves the display name for a registered synth ID.
 - `isRecording(): boolean` — reports whether event capture is active.
+- `isPaused(): boolean` — reports whether active event capture is paused.
 - `hasPendingName(): boolean` — reports whether a stopped capture still needs a name.

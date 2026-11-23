@@ -8,6 +8,7 @@ import java.awt.Color;
 public interface IConstants {
 
     public static final int ZERO_INT = 0;
+    public static final int ONE_INT = 1;
     public static final long ZERO_LONG = 0L;
     public static final byte PADDING_BYTE = 0;
     public static final String EMPTY_STRING = "";
@@ -235,6 +236,7 @@ public interface IConstants {
     // ------------------------------------------------------------ Reproducción
     public static final int PLAYBACK_BUFFER_SIZE = 64;
     public static final long NANOS_PER_MILLI = 1_000_000L;
+    public static final long MAX_PLAYBACK_OFFSET_MS = Long.MAX_VALUE / NANOS_PER_MILLI;
 
     // ------------------------------------------------------------ UI
     public static final String APP_TITLE = "Power Band - Editor musical";
@@ -248,18 +250,28 @@ public interface IConstants {
     public static final Color IDLE_COLOR = new Color(60, 60, 60);
     public static final String BTN_RECORD = "● Grabar";
     public static final String BTN_STOP_RECORD = "■ Terminar grabación";
-    public static final String BTN_SAVE_RECORDING = "Guardar grabación...";
+    public static final String BTN_PAUSE_RECORDING = "Ⅱ Pausar";
+    public static final String BTN_RESUME_RECORDING = "▶ Reanudar";
+    public static final String BTN_YES_SAVE_RECORDING = "Sí, guardar";
+    public static final String BTN_NO_DISCARD_RECORDING = "No, borrar";
     public static final String BTN_LOAD = "Cargar...";
     public static final String BTN_PLAY = "▶ Play";
     public static final String BTN_STOP_PLAY = "■ Stop";
     public static final String LBL_NO_RECORDING = "Ninguna música cargada";
-    public static final String LBL_WAITING_FOR_NAME = "Grabación detenida; asigne un nombre para guardar.";
+    public static final String LBL_WAITING_FOR_NAME = "Grabación detenida; decida si desea guardarla.";
+    public static final String LBL_RECORDING_DISCARDED = "Grabación descartada.";
     public static final String LBL_LOADED = "Cargada: %s (bytes %d a %d, %d comandos)";
     public static final String LBL_RECORDING = "GRABANDO...";
+    public static final String LBL_RECORDING_PAUSED = "GRABACIÓN EN PAUSA";
     public static final String LBL_PLAYING = "Reproduciendo: %s";
     public static final String MSG_ASK_NAME = "Nombre de la música grabada:";
+    public static final String MSG_CONFIRM_SAVE_RECORDING = "¿Desea guardar la grabación?";
     public static final String MSG_SAVED_RECORDING = "Grabación \"%s\" guardada.";
     public static final String MSG_DISCARD = "¿Descartar la grabación?";
+    public static final String MSG_DISCARD_AND_EXIT =
+            "Hay una grabación sin guardar. ¿Descartarla y salir?";
+    public static final String BTN_DISCARD_AND_EXIT = "Descartar y salir";
+    public static final String BTN_KEEP_RECORDING = "Seguir grabando";
     public static final String MSG_SELECT = "Seleccione una grabación (orden cronológico):";
     public static final String MSG_EMPTY_LIST = "No hay grabaciones todavía.";
     public static final String MSG_SC_DOWN = "SuperCollider no responde en %s:%d.\nAbra myband.sc y ejecute ~myband.load;\nEl programa sigue, pero no sonará hasta que el servidor esté arriba.";
@@ -269,6 +281,62 @@ public interface IConstants {
     public static final String MONITOR_FORMAT = "[%s] %6d ms  %-12s %-4s nota=%d dur=%d vel=%.2f t=(%.2f, %.2f, %.2f)";
     public static final String INSTRUMENT_FORMAT = "%s → %s: %s";
     public static final String[] ACTION_NAMES = { "", "PLAY", "ON", "OFF" };
+
+    // ------------------------------------------------------------ Editor musical
+    public static final String LOGO_TEXT = "POWER BAND";
+    public static final String PAGE_EDITOR = "editor";
+    public static final String PAGE_RECORDER = "recorder";
+    public static final String PAGE_PLAYER = "player";
+    public static final String TAB_EDITOR = "Editor";
+    public static final String TAB_RECORDER = "Grabadora";
+    public static final String TAB_PLAYER = "Reproductor";
+    public static final String BTN_SAVE_COPY = "Guardar cambios como copia...";
+    public static final String BTN_LOAD_SELECTED = "Cargar selección";
+    public static final String BTN_PLAY_SELECTED = "Reproducir selección";
+    public static final String MSG_SAVE_COPY = "Nombre de la copia editada:";
+    public static final String MSG_COPY_SAVED = "Copia \"%s\" guardada.";
+    public static final String MSG_NO_EVENTS = "La grabación no contiene comandos.";
+    public static final String MSG_EDITED_RECORDING = "Edite tiempo, nota, duración, volumen y timbres.";
+    public static final String MSG_SELECT_RECORDING = "Seleccione una grabación para cargar.";
+    public static final String MSG_EDITED_COPY_ONLY = "Los cambios se guardan en una copia; el original no se modifica.";
+    public static final String MSG_INVALID_EDIT = "El valor no es válido para este comando.";
+    public static final String LBL_READY = "Listo";
+    public static final String LBL_LOADED_RECORDING = "Grabación cargada: %s";
+    public static final String LBL_COPY_SAVED = "Copia guardada: %s";
+    public static final String LBL_PLAYBACK_STOPPED = "Reproducción detenida.";
+    public static final String LBL_PLAYBACK_COMPLETE = "Reproducción finalizada.";
+    public static final String LBL_RECORDING_PAGE =
+            "Inicie o termine la grabación y páusela o reanúdela. Al terminar, confirme si desea guardarla.";
+    public static final String LBL_PLAYER_PAGE = "Las grabaciones se muestran en orden cronológico.";
+    public static final String COL_TIME = "Tiempo (ms)";
+    public static final String COL_SYNTH = "Sintetizador";
+    public static final String COL_ACTION = "Acción";
+    public static final String COL_NOTE = "Nota";
+    public static final String COL_DURATION = "Duración (ms)";
+    public static final String COL_VOLUME = "Volumen";
+    public static final String COL_TIMBRE_1 = "Timbre 1";
+    public static final String COL_TIMBRE_2 = "Timbre 2";
+    public static final String COL_TIMBRE_3 = "Timbre 3";
+    public static final int TIMELINE_COLUMN_COUNT = 9;
+    public static final int TIMELINE_TIME_COLUMN = 0;
+    public static final int TIMELINE_SYNTH_COLUMN = 1;
+    public static final int TIMELINE_ACTION_COLUMN = 2;
+    public static final int TIMELINE_NOTE_COLUMN = 3;
+    public static final int TIMELINE_DURATION_COLUMN = 4;
+    public static final int TIMELINE_VOLUME_COLUMN = 5;
+    public static final int TIMELINE_TIMBRE_1_COLUMN = 6;
+    public static final int TIMELINE_TIMBRE_2_COLUMN = 7;
+    public static final int TIMELINE_TIMBRE_3_COLUMN = 8;
+    public static final int UI_SMALL_GAP = 6;
+    public static final int UI_LOGO_FONT_SIZE = 30;
+    public static final String UI_FONT_FAMILY = "SansSerif";
+    public static final Color UI_BACKGROUND_COLOR = new Color(65, 68, 74);
+    public static final Color UI_PANEL_COLOR = new Color(78, 82, 89);
+    public static final Color UI_ACCENT_COLOR = new Color(42, 116, 190);
+    public static final Color UI_TEXT_COLOR = Color.WHITE;
+    public static final Color UI_LOGO_COLOR = new Color(205, 48, 48);
+    public static final Color UI_TABLE_GRID_COLOR = new Color(110, 115, 123);
+    public static final String PLAYBACK_THREAD_NAME = "powerband-playback";
 
     // ------------------------------------------------------------ Mensajes de error
     public static final String ERR_SC_SEND = "No se pudo enviar el comando a SuperCollider";
@@ -308,4 +376,8 @@ public interface IConstants {
     public static final String ERR_NOTHING_LOADED = "Primero cargue una grabación.";
     public static final String ERR_UNKNOWN_RECORDING = "Error inesperado al guardar la grabación.";
     public static final String ERR_UNKNOWN_APPLICATION = "Error inesperado en Power Band.";
+    public static final String ERR_RECORDING_BUSY = "Termine la grabación actual antes de realizar esta operación.";
+    public static final String ERR_PLAYBACK_UNAVAILABLE = "El reproductor de sintetizadores no está configurado.";
+    public static final String ERR_PLAYBACK_ACTIVE = "Ya hay una reproducción en curso.";
+    public static final String ERR_INVALID_EDITED_RECORDING = "Los cambios contienen valores inválidos o tiempos desordenados.";
 }

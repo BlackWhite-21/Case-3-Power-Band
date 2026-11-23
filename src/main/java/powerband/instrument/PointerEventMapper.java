@@ -36,7 +36,9 @@ final class PointerEventMapper {
         }
 
         float pressure = IConstants.HUION_PRESSURE_MIN;
-        if (estado == EstadoPluma.PRESIONADO || estado == EstadoPluma.MOVIMIENTO) {
+        boolean pPressureRequired = estado == EstadoPluma.PRESIONADO
+                || estado == EstadoPluma.MOVIMIENTO && pEvent.inContact();
+        if (pPressureRequired) {
             if (!pEvent.pressureAvailable()) {
                 throw new DeviceException(IConstants.ERR_HUION_POINTER_UNSUPPORTED);
             }
@@ -44,9 +46,7 @@ final class PointerEventMapper {
                     || pEvent.pressure() > IConstants.HUION_POINTER_PRESSURE_MAX) {
                 throw new DeviceException(IConstants.ERR_HUION_POINTER_EVENT);
             }
-            if (estado == EstadoPluma.PRESIONADO || pEvent.inContact()) {
-                pressure = (float) pEvent.pressure() / IConstants.HUION_POINTER_PRESSURE_MAX;
-            }
+            pressure = (float) pEvent.pressure() / IConstants.HUION_POINTER_PRESSURE_MAX;
         }
 
         if (estado == EstadoPluma.FUERA_SUPERFICIE || estado == EstadoPluma.LIBERADO) {

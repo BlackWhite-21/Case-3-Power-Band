@@ -1,6 +1,7 @@
 package powerband.instrument;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Constructor;
@@ -17,11 +18,15 @@ class JnaPointerStructureTest {
     @Test
     void nativeStructuresHaveConsistentFieldLayouts() throws Exception {
         Structure pWinPoint = createStructure("WinPoint");
+        Structure pWinPointReference = createStructure("WinPointReference", 0, 0);
         Structure pPointerInfo = createStructure("PointerInfo");
         Structure pPointerPenInfo = createStructure("PointerPenInfo");
         Structure pNativeMessage = createStructure("NativeMessage", Pointer.NULL);
 
         assertEquals(Integer.BYTES * 2, pWinPoint.size());
+        assertEquals(Integer.BYTES * 2, pWinPointReference.size());
+        assertTrue(Structure.ByReference.class.isAssignableFrom(pWinPointReference.getClass()));
+        assertFalse(Structure.ByValue.class.isAssignableFrom(pWinPointReference.getClass()));
         assertTrue(pPointerInfo.size() > pWinPoint.size());
         assertEquals(pPointerInfo.size() + Integer.BYTES * 6, pPointerPenInfo.size());
         assertTrue(pNativeMessage.size() > pWinPoint.size());
@@ -60,5 +65,13 @@ class JnaPointerStructureTest {
         Constructor<?> pConstructor = pStructureType.getDeclaredConstructor(Pointer.class);
         pConstructor.setAccessible(true);
         return (Structure) pConstructor.newInstance(new Object[] { pPointer });
+    }
+
+    private Structure createStructure(String pSimpleName, int pX, int pY) throws Exception {
+        Class<?> pStructureType = Class.forName(
+                JnaPointerInputSource.class.getName() + "$" + pSimpleName);
+        Constructor<?> pConstructor = pStructureType.getDeclaredConstructor(int.class, int.class);
+        pConstructor.setAccessible(true);
+        return (Structure) pConstructor.newInstance(pX, pY);
     }
 }

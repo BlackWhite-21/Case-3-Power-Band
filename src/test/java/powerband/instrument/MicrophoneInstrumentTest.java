@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static powerband.util.IConstants.ACTION_OFF;
 import static powerband.util.IConstants.ACTION_ON;
+import static powerband.util.IConstants.ERR_MIC_READ;
 import static powerband.util.IConstants.MIC_FRAME_SAMPLES;
 import static powerband.util.IConstants.MIC_SAMPLE_RATE;
 import static powerband.util.IConstants.MIDI_A4_FREQ;
@@ -60,6 +61,58 @@ class MicrophoneInstrumentTest {
         assertTrue(transport.lastAsText().startsWith("/n_set"));
     }
 
+    @Test
+    void doesNotReportReadFailureCausedByIntentionalStop() throws Exception {
+        BlockingAudioSource pSource = new BlockingAudioSource();
+        List<PowerBandException> pFailures = new CopyOnWriteArrayList<>();
+        MicrophoneInstrument pInstrument = new MicrophoneInstrument(
+                pSource,
+                new ViolinCommand(new OscClient(new FakeOscTransport())),
+                pEvent -> {
+                },
+                pFailures::add);
+
+        pInstrument.start();
+        pInstrument.stop();
+
+        assertTrue(pFailures.isEmpty());
+    }
+
+    @Test
+    void stillReportsMicrophoneReadFailureWhileCaptureIsActive() throws Exception {
+        CountDownLatch pFailureDelivered = new CountDownLatch(1);
+        List<PowerBandException> pFailures = new CopyOnWriteArrayList<>();
+        MicrophoneAudioSource pFailingSource = new MicrophoneAudioSource() {
+            @Override
+            public void open() {
+            }
+
+            @Override
+            public float[] readFrame() throws DeviceException {
+                throw new DeviceException(ERR_MIC_READ);
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        MicrophoneInstrument pInstrument = new MicrophoneInstrument(
+                pFailingSource,
+                new ViolinCommand(new OscClient(new FakeOscTransport())),
+                pEvent -> {
+                },
+                pFailure -> {
+                    pFailures.add(pFailure);
+                    pFailureDelivered.countDown();
+                });
+
+        pInstrument.start();
+
+        assertTrue(pFailureDelivered.await(3, TimeUnit.SECONDS));
+        pInstrument.stop();
+        assertEquals(ERR_MIC_READ, pFailures.getFirst().getMessage());
+    }
+
     private static final class BlockingAudioSource implements MicrophoneAudioSource {
 
         private boolean closed;
@@ -84,7 +137,7 @@ class MicrophoneInstrumentTest {
                     throw new DeviceException("interrupted", e);
                 }
             }
-            return new float[MIC_FRAME_SAMPLES];
+            throw new DeviceException(ERR_MIC_READ);
         }
 
         @Override

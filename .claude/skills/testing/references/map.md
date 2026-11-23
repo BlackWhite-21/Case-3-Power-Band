@@ -51,7 +51,8 @@ Swing tablet-to-instrument adapter tests with a fake pointer source. `src/test/j
 ### PointerEventMapperTest
 Huion Pointer API event, coordinate, pressure, and state mapping tests. `src/test/java/powerband/instrument/PointerEventMapperTest.java`
 - `normalizesRealPressureAndConvertsHiDpiComponentCoordinates(): void` — checks pressure normalization and logical coordinates.
-- `hoverMovementHasZeroPressureAndReleaseAlwaysClearsPressure(): void` — checks hover and leave pressure/state.
+- `hoverMovementHasZeroPressureAndReleaseAlwaysClearsPressure(): void` — checks hover without pressure data and leave pressure/state.
+- `penLiftHoverUpdateWithoutPressureIsAZeroPressureMovement(): void` — checks pressure-free hover updates after pen contact ends.
 - `reportsUnsupportedPressureInsteadOfInventingAReading(): void` — rejects unavailable pressure.
 - `reportsCoordinatesOutsideTheRegisteredComponentAsOutOfSurface(): void` — maps external coordinates to outside-surface state.
 - `rejectsInvalidPressureAndCoordinateTransforms(): void` — rejects invalid pressure and scaling.
@@ -66,8 +67,8 @@ Asynchronous adapter lifecycle and listener tests using a fake pointer source. `
 - `rejectsUnsupportedOsBeforeLoadingWindowsApi(): void` — checks unsupported-platform handling.
 
 ### JnaPointerStructureTest
-Windows Pointer API structure layout tests without loading User32. `src/test/java/powerband/instrument/JnaPointerStructureTest.java`
-- `nativeStructuresHaveConsistentFieldLayouts(): void` — checks JNA field orders, x64 structure sizes, and ABI offsets.
+Windows Pointer API structure layout and coordinate-argument convention tests without loading User32. `src/test/java/powerband/instrument/JnaPointerStructureTest.java`
+- `nativeStructuresHaveConsistentFieldLayouts(): void` — checks JNA field orders, x64 structure sizes, ABI offsets, and by-reference `ScreenToClient` coordinates.
 
 ### JnaPointerInputSourceTest
 Hook callback reference lifecycle tests with a fake Windows Pointer API. `src/test/java/powerband/instrument/JnaPointerInputSourceTest.java`
@@ -83,6 +84,8 @@ PCM-to-violin pitch and velocity tests. `src/test/java/powerband/instrument/Micr
 ### MicrophoneInstrumentTest
 Asynchronous instrument test with a blocking fake audio source. `src/test/java/powerband/instrument/MicrophoneInstrumentTest.java`
 - `usesInjectedAudioSourceAndDispatchesOnAndOffWithoutHardware(): void` — checks capture lifecycle and note events without a physical input.
+- `doesNotReportReadFailureCausedByIntentionalStop(): void` — checks close-triggered read failure suppression.
+- `stillReportsMicrophoneReadFailureWhileCaptureIsActive(): void` — ensures genuine read failures remain visible.
 
 ### BinaryRecordingRepositoryTest
 Binary files, search, index sorting, chronological list, and persistence-failure tests. `src/test/java/powerband/repository/BinaryRecordingRepositoryTest.java`
@@ -90,26 +93,31 @@ Binary files, search, index sorting, chronological list, and persistence-failure
 - `balancedMergeSortOrdersDiskIndexAndListKeepsRecordingOrder(): void` — checks disk-index order after each save and recording-order list.
 - `readsAndAppendsEditedCopyWithoutChangingSourceRecording(): void` — checks bounded command reads, copy persistence, and source immutability.
 - `duplicateCopyNameDoesNotAppendPartialMusic(): void` — checks duplicate rejection without a partial append.
+- `discardsActiveRecordingAndPreservesPreviouslySavedRecords(): void` — checks active-capture rollback preserves earlier recordings.
+- `discardsStoppedRecordingAwaitingName(): void` — checks unnamed stopped-capture rollback.
 - `duplicateNameKeepsStoppedRecordingAvailableForRetry(): void` — checks duplicate rejection and retry.
 - `findsSavedRecordingAfterRepositoryIsReopened(): void` — checks persistent binary search with a new repository instance.
 - `failedListWriteDoesNotReportSuccessAndKeepsRecordingAvailableForRetry(): void` — checks rollback and retry after a list-file I/O failure.
 - `reportsMissingNamesAndRejectsBrokenMusicFile(): void` — checks not-found and I/O error reporting.
 
 ### RecordingServiceTest
-Recording lifecycle, relative timing, name validation, edited copies, and playback tests with an in-memory repository fake. `src/test/java/powerband/service/RecordingServiceTest.java`
+Recording lifecycle, pause timing, name validation, edited copies, and playback tests with an in-memory repository fake. `src/test/java/powerband/service/RecordingServiceTest.java`
 - `recordsMonotonicOffsetsInArrivalOrderAndIgnoresEventsAfterStop(): void` — checks event offsets and stop behavior.
+- `pausesCaptureAndExcludesPausedTimeFromRecordedOffsets(): void` — checks paused events are ignored and pause duration is excluded.
 - `rejectsStartingAnotherRecordingUntilThePendingOneIsSaved(): void` — checks the pending-name lifecycle.
 - `rejectsInvalidAndDuplicateNamesButPreservesPendingRecordingForRetry(): void` — checks validation and retry behavior.
 - `rejectsEmptyAndOverlongNames(): void` — checks name bounds.
 - `rejectsStopAndSaveWithoutAnActiveOrPendingRecording(): void` — checks invalid lifecycle operations.
+- `discardsActiveOrPendingRecordingAndAllowsStartingAgain(): void` — checks discard resets the service lifecycle.
 - `loadsEventsAndSavesEditedCopyWithoutChangingSource(): void` — checks loading and immutable-copy persistence.
 - `keepsEditedEventsAvailableWhenCopyNameIsDuplicated(): void` — checks duplicate-name retry behavior.
 - `rejectsUnorderedOrInvalidEditedEvents(): void` — checks edited-event validation.
 - `playsEventsThroughSynthRegistryAndCompletesAfterDispatch(): void` — checks timed event dispatch through a fake OSC transport.
 
 ### RecordingEditorPanelTest
-Headless Swing branding, page controls, and editable timeline tests. `src/test/java/powerband/ui/RecordingEditorPanelTest.java`
+Headless Swing branding, page-specific control structure, and editable timeline tests. `src/test/java/powerband/ui/RecordingEditorPanelTest.java`
 - `showsTheThreeEditorPagesAndPowerBandBranding(): void` — checks page navigation labels and logo color.
+- `recordingControlsAreExclusiveToRecorderPage(): void` — checks Grabadora has only start/stop and pause/resume controls, with playback controls in Reproductor.
 - `timelineEditsChangeOnlyTheWorkingCopy(): void` — checks editable fields and source-event immutability.
 
 ### FakeOscTransport

@@ -32,7 +32,7 @@ Un diagnóstico previo en Windows 11 confirmó que la Kamvas 13 GS1331 y el cont
 mvn compile exec:java
 ```
 
-Si SuperCollider no está arriba, el programa avisa y sigue abierto. Si un dispositivo no está, su línea dice `no disponible: ...` y los otros dos siguen funcionando.
+El punto de entrada está en `powerband.Main` (`src/main/java/powerband/Main.java`): al iniciarlo se muestra la interfaz Swing y, después, se activan los instrumentos y la conexión OSC. Si SuperCollider no está arriba, el programa avisa y sigue abierto. Si falla la apertura del transporte OSC, también mantiene abierta la interfaz para usar el editor; las funciones de reproducción requieren el servidor. Si un dispositivo no está, su línea dice `no disponible: ...` y los otros dos siguen funcionando.
 
 ## Pruebas
 

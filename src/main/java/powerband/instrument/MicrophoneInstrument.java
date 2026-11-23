@@ -87,13 +87,16 @@ public class MicrophoneInstrument extends Instrument {
                 dispatchEvents(analyzer.processFrame(audioSource.readFrame()));
             }
         } catch (DeviceException | SynthException e) {
-            running.set(false);
-            errorListener.accept(e);
+            if (running.compareAndSet(true, false)) {
+                errorListener.accept(e);
+            }
         } finally {
             try {
                 audioSource.close();
             } catch (DeviceException e) {
-                errorListener.accept(e);
+                if (running.compareAndSet(true, false)) {
+                    errorListener.accept(e);
+                }
             }
             try {
                 dispatchAnalyzerRelease();

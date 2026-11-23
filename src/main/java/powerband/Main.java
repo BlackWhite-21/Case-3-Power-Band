@@ -21,7 +21,11 @@ import powerband.osc.OscClient;
 import powerband.osc.UdpOscTransport;
 import powerband.repository.BinaryRecordingRepository;
 import powerband.service.RecordingService;
+import powerband.synth.BassCommand;
+import powerband.synth.OrganCommand;
+import powerband.synth.PianoCommand;
 import powerband.synth.SaxophoneCommand;
+import powerband.synth.SynthCommandRegistry;
 import powerband.synth.ViolinCommand;
 import powerband.ui.RecordingEditorFrame;
 import powerband.util.IConstants;
@@ -38,18 +42,28 @@ public final class Main {
     }
 
     private static void startApplication() {
-        RecordingService pRecordingService =
-                new RecordingService(new BinaryRecordingRepository());
-        RecordingEditorFrame pFrame = new RecordingEditorFrame(pRecordingService);
+        BinaryRecordingRepository pRepository = new BinaryRecordingRepository();
         OscClient pOscClient;
         try {
             pOscClient = new OscClient(new UdpOscTransport(
                     IConstants.SC_DEFAULT_HOST,
                     IConstants.SC_DEFAULT_PORT));
         } catch (IOException pException) {
-            showError(pFrame, pException.getMessage());
+            startEditorWithoutSynthServer(pRepository, pException);
             return;
         }
+        SaxophoneCommand pSaxophoneCommand = new SaxophoneCommand(pOscClient);
+        ViolinCommand pViolinCommand = new ViolinCommand(pOscClient);
+        OrganCommand pOrganCommand = new OrganCommand(pOscClient);
+        SynthCommandRegistry pSynthCommandRegistry = new SynthCommandRegistry();
+        pSynthCommandRegistry.register(new PianoCommand(pOscClient));
+        pSynthCommandRegistry.register(new BassCommand(pOscClient));
+        pSynthCommandRegistry.register(pOrganCommand);
+        pSynthCommandRegistry.register(pSaxophoneCommand);
+        pSynthCommandRegistry.register(pViolinCommand);
+        RecordingService pRecordingService =
+                new RecordingService(pRepository, pSynthCommandRegistry);
+        RecordingEditorFrame pFrame = new RecordingEditorFrame(pRecordingService);
 
         AtomicBoolean pShutdown = new AtomicBoolean();
         Object pInstrumentLifecycleLock = new Object();
@@ -61,25 +75,41 @@ public final class Main {
                 pEvent);
         HuionInstrument pHuionInstrument = new HuionInstrument(
                 new TabletaHuionInputSource(pFrame.getContentPane()),
-                new SaxophoneCommand(pOscClient),
+                pSaxophoneCommand,
                 pEventListener,
                 pException -> showError(pFrame, pException.getMessage()));
         MicrophoneInstrument pMicrophoneInstrument = new MicrophoneInstrument(
                 new DefaultMicrophoneAudioSource(),
-                new ViolinCommand(pOscClient),
+                pViolinCommand,
                 pEventListener,
                 pException -> showError(pFrame, pException));
 
         pFrame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent pEvent) {
-                if (pShutdown.compareAndSet(false, true)) {
-                    Thread.ofPlatform().start(() -> shutdown(
+                if (!pShutdown.compareAndSet(false, true)) {
+                    return;
+                }
+                if (!confirmDiscardRecording(pFrame, pRecordingService)) {
+                    pShutdown.set(false);
+                    return;
+                }
+                pRecordingService.stopPlayback();
+                Thread.ofPlatform().start(() -> {
+                    try {
+                        discardPendingRecording(pRecordingService);
+                    } catch (RecordingException pException) {
+                        pShutdown.set(false);
+                        showError(pFrame, pException.getMessage());
+                        return;
+                    }
+                    shutdown(
                             pHuionInstrument,
                             pMicrophoneInstrument,
                             pOscClient,
-                            pInstrumentLifecycleLock));
-                }
+                            pInstrumentLifecycleLock);
+                    SwingUtilities.invokeLater(pFrame::dispose);
+                });
             }
         });
         pFrame.setVisible(true);
@@ -95,6 +125,66 @@ public final class Main {
                 pInstrumentLifecycleLock,
                 pException -> showError(pFrame, pException)));
         Thread.startVirtualThread(() -> pingSuperCollider(pOscClient, pFrame, pShutdown));
+    }
+
+    private static void startEditorWithoutSynthServer(
+            BinaryRecordingRepository pRepository,
+            IOException pException) {
+        RecordingService pRecordingService = new RecordingService(pRepository);
+        RecordingEditorFrame pFrame = new RecordingEditorFrame(pRecordingService);
+        AtomicBoolean pShutdown = new AtomicBoolean();
+        pFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent pEvent) {
+                if (!pShutdown.compareAndSet(false, true)) {
+                    return;
+                }
+                if (!confirmDiscardRecording(pFrame, pRecordingService)) {
+                    pShutdown.set(false);
+                    return;
+                }
+                Thread.ofPlatform().start(() -> {
+                    try {
+                        discardPendingRecording(pRecordingService);
+                        SwingUtilities.invokeLater(pFrame::dispose);
+                    } catch (RecordingException pDiscardException) {
+                        pShutdown.set(false);
+                        showError(pFrame, pDiscardException.getMessage());
+                    }
+                });
+            }
+        });
+        pFrame.setVisible(true);
+        showError(pFrame, pException.getMessage());
+    }
+
+    private static boolean confirmDiscardRecording(
+            RecordingEditorFrame pFrame,
+            RecordingService pRecordingService) {
+        if (!pRecordingService.isRecording() && !pRecordingService.hasPendingName()) {
+            return true;
+        }
+        Object[] pOptions = {
+                IConstants.BTN_DISCARD_AND_EXIT,
+                IConstants.BTN_KEEP_RECORDING
+        };
+        int pResult = JOptionPane.showOptionDialog(
+                pFrame,
+                IConstants.MSG_DISCARD_AND_EXIT,
+                IConstants.MSG_ERROR_TITLE,
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE,
+                null,
+                pOptions,
+                pOptions[IConstants.ONE_INT]);
+        return pResult == IConstants.ZERO_INT;
+    }
+
+    private static void discardPendingRecording(RecordingService pRecordingService)
+            throws RecordingException {
+        if (pRecordingService.isRecording() || pRecordingService.hasPendingName()) {
+            pRecordingService.discardRecording();
+        }
     }
 
     static void startInstrument(

@@ -1,0 +1,42 @@
+@startuml ft-12-editor-musical
+title ft-12 - Edición y guardado de una copia de grabación
+hide footbox
+
+actor Usuario
+participant "RecordingEditorFrame" as Frame
+participant "RecordingEditorPanel" as UI
+participant "RecordingService" as Service
+participant "RecordingRepository" as Repo
+database "recordings.music" as Music
+database "recordings.index" as Index
+collections "recordings.list" as List
+
+Usuario -> Frame: seleccionar Editor / Grabadora / Reproductor
+Frame -> UI: mostrar página
+
+Usuario -> UI: Cargar música
+UI -> Service: listRecordings() / loadRecording(name)
+Service --> UI: RecordingInfo y comandos
+UI -> UI: mostrar línea de tiempo por synth
+
+Usuario -> UI: editar tiempo, nota, duración, volumen o timbre
+UI -> UI: actualizar comandos de la copia en edición
+Usuario -> UI: Guardar como copia
+UI -> Usuario: solicitar nombre nuevo
+Usuario --> UI: nombre
+UI -> Service: saveEditedCopy(name, events)
+Service -> Repo: guardar encabezado y comandos de copia
+Repo -> Music: anexar copia sin modificar original
+Repo -> Index: insertar referencia y ordenar en disco
+Repo -> List: anexar nombre y fecha
+Service --> UI: RecordingInfo o error de nombre duplicado
+UI --> Usuario: confirmar o solicitar otro nombre
+
+Usuario -> UI: Grabar / Terminar
+UI -> Service: startRecording() / stopRecording()
+Service --> UI: estado de captura detenida
+UI -> Usuario: solicitar nombre
+Usuario --> UI: nombre nuevo
+UI -> Service: saveRecording(name)
+Service --> UI: RecordingInfo o error de nombre duplicado
+@enduml

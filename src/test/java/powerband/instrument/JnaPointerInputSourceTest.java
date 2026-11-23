@@ -118,7 +118,9 @@ class JnaPointerInputSourceTest {
         }
 
         @Override
-        public boolean ScreenToClient(Pointer pWindow, JnaPointerInputSource.WinPoint pPoint) {
+        public boolean ScreenToClient(
+                Pointer pWindow,
+                JnaPointerInputSource.WinPointReference pPoint) {
             return false;
         }
 

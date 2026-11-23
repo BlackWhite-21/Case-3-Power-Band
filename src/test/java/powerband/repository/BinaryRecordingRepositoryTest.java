@@ -144,6 +144,82 @@ class BinaryRecordingRepositoryTest {
     }
 
     @Test
+    void readsAndAppendsEditedCopyWithoutChangingSourceRecording() throws Exception {
+        long pRecordedAt = Instant.parse("2026-11-22T18:00:00Z").toEpochMilli();
+        SynthEvent pOriginalEvent = new SynthEvent(125, SYNTH_SAXOPHONE_ID, ACTION_ON,
+                60, 0, 0.75f, 0.1f, 0.2f, 0.3f);
+        repository.beginRecording(pRecordedAt);
+        repository.appendEvent(pOriginalEvent);
+        repository.stopRecording();
+        repository.finalizeRecording("original");
+        byte[] pOriginalMusicBytes = Files.readAllBytes(dataDirectory.resolve(MUSIC_FILE));
+        SynthEvent pEditedEvent = new SynthEvent(300, SYNTH_SAXOPHONE_ID, ACTION_ON,
+                64, 250, 0.55f, 0.4f, 0.5f, 0.6f);
+
+        assertEquals(List.of(pOriginalEvent), repository.readEvents("original"));
+        repository.saveCopy("editada", List.of(pEditedEvent), pRecordedAt + 1_000L);
+
+        assertEquals(pOriginalMusicBytes.length, MUSIC_RECORD_SIZE * 2);
+        assertEquals(pOriginalMusicBytes.length + MUSIC_RECORD_SIZE * 2,
+                Files.size(dataDirectory.resolve(MUSIC_FILE)));
+        assertTrue(java.util.Arrays.equals(
+                pOriginalMusicBytes,
+                java.util.Arrays.copyOf(Files.readAllBytes(dataDirectory.resolve(MUSIC_FILE)),
+                        pOriginalMusicBytes.length)));
+        assertEquals(List.of(pOriginalEvent), repository.readEvents("original"));
+        assertEquals(List.of(pEditedEvent), repository.readEvents("editada"));
+        assertEquals(List.of("original", "editada"),
+                repository.listRecordings().stream().map(RecordingInfo::name).toList());
+        assertEquals(INDEX_RECORD_SIZE * 2, Files.size(dataDirectory.resolve(INDEX_FILE)));
+    }
+
+    @Test
+    void duplicateCopyNameDoesNotAppendPartialMusic() throws Exception {
+        saveRecording("ocupada");
+        long pOriginalLength = Files.size(dataDirectory.resolve(MUSIC_FILE));
+
+        assertThrows(
+                DuplicateNameException.class,
+                () -> repository.saveCopy("ocupada", List.of(), Instant.now().toEpochMilli()));
+
+        assertEquals(pOriginalLength, Files.size(dataDirectory.resolve(MUSIC_FILE)));
+        assertEquals(List.of("ocupada"),
+                repository.listRecordings().stream().map(RecordingInfo::name).toList());
+    }
+
+    @Test
+    void discardsActiveRecordingAndPreservesPreviouslySavedRecords() throws Exception {
+        saveRecording("guardada");
+        long pSavedLength = Files.size(dataDirectory.resolve(MUSIC_FILE));
+        repository.beginRecording(Instant.now().toEpochMilli());
+        repository.appendEvent(new SynthEvent(0, SYNTH_SAXOPHONE_ID, ACTION_ON,
+                60, 0, 0.5f, 0f, 0f, 0f));
+
+        repository.discardRecording();
+
+        assertEquals(pSavedLength, Files.size(dataDirectory.resolve(MUSIC_FILE)));
+        assertEquals(List.of("guardada"),
+                repository.listRecordings().stream().map(RecordingInfo::name).toList());
+        assertTrue(repository.containsName("guardada"));
+        repository.beginRecording(Instant.now().toEpochMilli());
+        repository.discardRecording();
+    }
+
+    @Test
+    void discardsStoppedRecordingAwaitingName() throws Exception {
+        repository.beginRecording(Instant.now().toEpochMilli());
+        repository.appendEvent(new SynthEvent(0, SYNTH_SAXOPHONE_ID, ACTION_ON,
+                62, 0, 0.5f, 0f, 0f, 0f));
+        repository.stopRecording();
+
+        repository.discardRecording();
+
+        assertEquals(ZERO_LONG, Files.size(dataDirectory.resolve(MUSIC_FILE)));
+        assertFalse(Files.exists(dataDirectory.resolve(INDEX_FILE)));
+        assertFalse(Files.exists(dataDirectory.resolve(LIST_FILE)));
+    }
+
+    @Test
     void failedListWriteDoesNotReportSuccessAndKeepsRecordingAvailableForRetry() throws Exception {
         Files.createDirectories(dataDirectory);
         Files.createDirectory(dataDirectory.resolve(LIST_FILE));

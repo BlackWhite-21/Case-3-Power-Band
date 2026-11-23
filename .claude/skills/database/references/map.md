@@ -16,6 +16,7 @@ Persistence contract for a recording lifecycle. `src/main/java/powerband/reposit
 - `beginRecording(long pRecordedAtEpochMillis): void` — creates a provisional music header.
 - `appendEvent(SynthEvent pEvent): void` — appends one fixed-size command record.
 - `stopRecording(): void` — closes the current capture for naming.
+- `discardRecording(): void` — truncates the provisional header and commands without changing earlier saved records.
 - `finalizeRecording(String pName): RecordingInfo` — writes the final header, sorted index entry, and chronological list row.
 - `containsName(String pName): boolean` — checks the disk index.
 - `findHeaderPosition(String pName): long` — binary-searches the index or throws `RecordingNotFoundException`.
@@ -30,6 +31,7 @@ Implements recording files, serialization, duplicate lookup, and transactional f
 - `beginRecording(long pRecordedAtEpochMillis): void` — writes the provisional header.
 - `appendEvent(SynthEvent pEvent): void` — appends a fixed-width command.
 - `stopRecording(): void` — closes the capture for naming.
+- `discardRecording(): void` — truncates the provisional recording from `recordings.music`.
 - `finalizeRecording(String pName): RecordingInfo` — finalizes music, index, and list files.
 - `containsName(String pName): boolean` — checks for a name with disk binary search.
 - `findHeaderPosition(String pName): long` — returns the header offset or throws not-found.

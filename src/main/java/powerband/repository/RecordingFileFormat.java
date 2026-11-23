@@ -49,6 +49,46 @@ final class RecordingFileFormat {
         return new IndexEntry(readFixedName(pInput), pInput.readLong());
     }
 
+    static HeaderEntry readHeader(RandomAccessFile pInput) throws IOException {
+        byte pRecordType = pInput.readByte();
+        if (pRecordType != IConstants.RECORD_TYPE_HEADER) {
+            throw new IOException(IConstants.ERR_RECORD_TYPE + pRecordType);
+        }
+        String pName = readFixedName(pInput);
+        long pStartOffset = pInput.readLong();
+        long pEndOffset = pInput.readLong();
+        long pRecordedAtEpochMillis = pInput.readLong();
+        skipPadding(pInput, IConstants.MUSIC_RECORD_SIZE - IConstants.MUSIC_HEADER_FIXED_BYTES);
+        return new HeaderEntry(pName, pStartOffset, pEndOffset, pRecordedAtEpochMillis);
+    }
+
+    static SynthEvent readCommand(RandomAccessFile pInput) throws IOException {
+        byte pRecordType = pInput.readByte();
+        if (pRecordType != IConstants.RECORD_TYPE_COMMAND) {
+            throw new IOException(IConstants.ERR_RECORD_TYPE + pRecordType);
+        }
+        long pOffsetMs = pInput.readLong();
+        int pSynthId = pInput.readInt();
+        int pAction = pInput.readInt();
+        int pNote = pInput.readInt();
+        int pDurationMs = pInput.readInt();
+        float pVelocity = pInput.readFloat();
+        float pTimbre1 = pInput.readFloat();
+        float pTimbre2 = pInput.readFloat();
+        float pTimbre3 = pInput.readFloat();
+        skipPadding(pInput, IConstants.MUSIC_RECORD_SIZE - IConstants.MUSIC_COMMAND_FIXED_BYTES);
+        return new SynthEvent(
+                pOffsetMs,
+                pSynthId,
+                pAction,
+                pNote,
+                pDurationMs,
+                pVelocity,
+                pTimbre1,
+                pTimbre2,
+                pTimbre3);
+    }
+
     private static void writeFixedName(RandomAccessFile pOutput, String pName) throws IOException {
         if (pName.length() > IConstants.NAME_LENGTH) {
             throw new IOException(IConstants.ERR_RECORD_SIZE + IConstants.NAME_LENGTH);
@@ -83,6 +123,16 @@ final class RecordingFileFormat {
         }
     }
 
+    private static void skipPadding(RandomAccessFile pInput, int pPaddingSize) throws IOException {
+        int pSkippedBytes = pInput.skipBytes(pPaddingSize);
+        if (pSkippedBytes != pPaddingSize) {
+            throw new IOException(IConstants.ERR_MUSIC_IO);
+        }
+    }
+
     record IndexEntry(String name, long headerPosition) {
+    }
+
+    record HeaderEntry(String name, long startOffset, long endOffset, long recordedAtEpochMillis) {
     }
 }

@@ -228,7 +228,7 @@ final class JnaPointerInputSource implements PointerEventSource {
         PointerPenInfo pPenInfo = new PointerPenInfo();
         boolean pPenInfoAvailable = pIsPen
                 && windowsPointerApi.GetPointerPenInfo(pPointerId, pPenInfo);
-        WinPoint pPoint = getScreenPoint(pMessage, pPenInfo, pPenInfoAvailable);
+        WinPointReference pPoint = getScreenPoint(pMessage, pPenInfo, pPenInfoAvailable);
         boolean pCoordinatesAvailable = (pMessage.message == IConstants.HUION_WM_POINTER_CAPTURE_CHANGED
                         && !pPenInfoAvailable)
                 || windowsPointerApi.ScreenToClient(windowHandle, pPoint);
@@ -294,26 +294,26 @@ final class JnaPointerInputSource implements PointerEventSource {
                 pComponentHeight));
     }
 
-    private WinPoint getScreenPoint(
+    private WinPointReference getScreenPoint(
             NativeMessage pMessage,
             PointerPenInfo pPenInfo,
             boolean pPenInfoAvailable) {
         if (pPenInfoAvailable) {
-            return new WinPoint(
+            return new WinPointReference(
                     pPenInfo.pointerInfo.pixelLocation.x,
                     pPenInfo.pointerInfo.pixelLocation.y);
         }
         if (pMessage.message == IConstants.HUION_WM_POINTER_LEAVE) {
             long pLocation = Pointer.nativeValue(pMessage.lParam);
-            return new WinPoint(
+            return new WinPointReference(
                     (short) (pLocation & IConstants.HUION_POINTER_COORDINATE_MASK),
                     (short) ((pLocation >>> IConstants.HUION_POINTER_COORDINATE_SHIFT)
                             & IConstants.HUION_POINTER_COORDINATE_MASK));
         }
         if (pMessage.message == IConstants.HUION_WM_POINTER_CAPTURE_CHANGED) {
-            return new WinPoint(lastClientX, lastClientY);
+            return new WinPointReference(lastClientX, lastClientY);
         }
-        return new WinPoint(pMessage.point.x, pMessage.point.y);
+        return new WinPointReference(pMessage.point.x, pMessage.point.y);
     }
 
     private void enqueueEvent(NativePointerEvent pEvent) {
@@ -381,7 +381,7 @@ final class JnaPointerInputSource implements PointerEventSource {
 
         boolean IsChild(Pointer pParent, Pointer pChild);
 
-        boolean ScreenToClient(Pointer pWindow, WinPoint pPoint);
+        boolean ScreenToClient(Pointer pWindow, WinPointReference pPoint);
 
         Pointer SetWindowsHookExW(
                 int pHookType,
@@ -488,6 +488,18 @@ final class JnaPointerInputSource implements PointerEventSource {
         }
 
         private WinPoint(int pX, int pY) {
+            x = pX;
+            y = pY;
+        }
+    }
+
+    @Structure.FieldOrder({"x", "y"})
+    public static final class WinPointReference extends Structure implements Structure.ByReference {
+
+        public int x;
+        public int y;
+
+        private WinPointReference(int pX, int pY) {
             x = pX;
             y = pY;
         }

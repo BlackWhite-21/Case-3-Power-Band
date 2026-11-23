@@ -47,6 +47,18 @@ class PointerEventMapperTest {
     }
 
     @Test
+    void penLiftHoverUpdateWithoutPressureIsAZeroPressureMovement() throws Exception {
+        NativePointerEvent pHoverAfterLift = new NativePointerEvent(
+                HUION_WM_POINTER_UPDATE, 0, 40, 60, false, false, true,
+                1.0, 1.0, 0, 0, 100, 100);
+
+        DatosTableta pData = PointerEventMapper.map(pHoverAfterLift);
+
+        assertEquals(0f, pData.pressure());
+        assertEquals(EstadoPluma.MOVIMIENTO, pData.estado());
+    }
+
+    @Test
     void reportsUnsupportedPressureInsteadOfInventingAReading() {
         NativePointerEvent pEvent = new NativePointerEvent(
                 HUION_WM_POINTER_UPDATE, 0, 10, 10, false, true, true,

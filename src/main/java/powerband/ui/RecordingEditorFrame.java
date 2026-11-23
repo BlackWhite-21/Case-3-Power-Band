@@ -12,7 +12,7 @@ public final class RecordingEditorFrame extends JFrame {
 
     public RecordingEditorFrame(RecordingService pRecordingService) {
         super(APP_TITLE);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setContentPane(new RecordingEditorPanel(pRecordingService));
         setLocationByPlatform(true);
