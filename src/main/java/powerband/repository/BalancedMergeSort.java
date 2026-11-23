@@ -110,7 +110,14 @@ final class BalancedMergeSort {
         RecordingFileFormat.IndexEntry pRight = pRightCount > IConstants.ZERO_LONG
                 ? RecordingFileFormat.readIndexEntry(pRightInput)
                 : null;
+        if ((pLeftCount > IConstants.ZERO_LONG && pLeft == null)
+                || (pRightCount > IConstants.ZERO_LONG && pRight == null)) {
+            throw new IOException(IConstants.ERR_INDEX_IO);
+        }
         while (pLeftCount > IConstants.ZERO_LONG && pRightCount > IConstants.ZERO_LONG) {
+            if (pLeft == null || pRight == null) {
+                throw new IOException(IConstants.ERR_INDEX_IO);
+            }
             if (pLeft.name().compareTo(pRight.name()) <= IConstants.ZERO_INT) {
                 writeEntry(pOutput, pLeft);
                 pLeftCount--;
@@ -126,6 +133,9 @@ final class BalancedMergeSort {
             }
         }
         while (pLeftCount > IConstants.ZERO_LONG) {
+            if (pLeft == null) {
+                throw new IOException(IConstants.ERR_INDEX_IO);
+            }
             writeEntry(pOutput, pLeft);
             pLeftCount--;
             pLeft = pLeftCount > IConstants.ZERO_LONG
@@ -133,6 +143,9 @@ final class BalancedMergeSort {
                     : null;
         }
         while (pRightCount > IConstants.ZERO_LONG) {
+            if (pRight == null) {
+                throw new IOException(IConstants.ERR_INDEX_IO);
+            }
             writeEntry(pOutput, pRight);
             pRightCount--;
             pRight = pRightCount > IConstants.ZERO_LONG

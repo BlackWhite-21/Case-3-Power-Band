@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
@@ -29,7 +28,7 @@ class JnaPointerInputSourceTest {
         JnaPointerInputSource pSource = createSource(pApi);
         pSource.installHook(pApi, null, null, new Pointer(Long.BYTES), Integer.BYTES);
         JnaPointerInputSource.PointerHook pCallback = pApi.callbackReference.get();
-        assertSame(pCallback, getHookProcedure(pSource));
+        assertSame(pCallback, pSource.getHookProcedure());
 
         pApi.blockNextCallback = true;
         Thread pCallbackThread = Thread.ofPlatform().start(() -> pCallback.callback(
@@ -49,7 +48,7 @@ class JnaPointerInputSourceTest {
 
             assertTrue(pApi.unhookEntered.await(2, TimeUnit.SECONDS));
             assertFalse(pDetach.isDone());
-            assertSame(pCallback, getHookProcedure(pSource));
+            assertSame(pCallback, pSource.getHookProcedure());
         } finally {
             pApi.allowCallbackReturn.countDown();
             pCallbackThread.join(TimeUnit.SECONDS.toMillis(2));
@@ -57,7 +56,7 @@ class JnaPointerInputSourceTest {
 
         assertFalse(pCallbackThread.isAlive());
         pDetach.get(2, TimeUnit.SECONDS);
-        assertNull(getHookProcedure(pSource));
+        assertNull(pSource.getHookProcedure());
     }
 
     @Test
@@ -70,18 +69,11 @@ class JnaPointerInputSourceTest {
 
         assertThrows(DeviceException.class, pSource::detach);
 
-        assertSame(pCallback, getHookProcedure(pSource));
+        assertSame(pCallback, pSource.getHookProcedure());
     }
 
     private static JnaPointerInputSource createSource(FakeWindowsPointerApi pApi) {
         return new JnaPointerInputSource(pApi);
-    }
-
-    private static JnaPointerInputSource.PointerHook getHookProcedure(
-            JnaPointerInputSource pSource) throws ReflectiveOperationException {
-        Field pField = JnaPointerInputSource.class.getDeclaredField("hookProcedure");
-        pField.setAccessible(true);
-        return (JnaPointerInputSource.PointerHook) pField.get(pSource);
     }
 
     private static final class FakeWindowsPointerApi

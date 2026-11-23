@@ -15,6 +15,7 @@ Source: `src/main/java/powerband/ui`
 ### RecordingEditorPanel
 Three-page Swing editor with an editable timeline, page-specific recording/player controls, a stop-to-save-or-discard prompt, chronological recording selection, playback, and save-as-copy behavior. `src/main/java/powerband/ui/RecordingEditorPanel.java`
 - `RecordingEditorPanel(RecordingService pRecordingService)` — creates the editor panel for a recording service.
+- Adds `Cargar...`, `Play`, and `Stop` controls for chronological listing, loading, timed playback, and cancellation.
 
 ### RecordingEditorFrame
 Window wrapper for the recording panel. `src/main/java/powerband/ui/RecordingEditorFrame.java`

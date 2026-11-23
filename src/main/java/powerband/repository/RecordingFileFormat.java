@@ -45,6 +45,51 @@ final class RecordingFileFormat {
         pOutput.writeLong(pHeaderPosition);
     }
 
+    static HeaderEntry readHeader(RandomAccessFile pInput) throws IOException {
+        byte pRecordType = pInput.readByte();
+        if (pRecordType != IConstants.RECORD_TYPE_HEADER) {
+            throw new IOException(IConstants.ERR_RECORD_TYPE + pRecordType);
+        }
+        String pName = readFixedName(pInput);
+        long pStartOffset = pInput.readLong();
+        long pEndOffset = pInput.readLong();
+        long pRecordedAtEpochMillis = pInput.readLong();
+        return new HeaderEntry(
+                pName,
+                pStartOffset,
+                pEndOffset,
+                pRecordedAtEpochMillis);
+    }
+
+    static SynthEvent readCommand(RandomAccessFile pInput) throws IOException {
+        byte pRecordType = pInput.readByte();
+        if (pRecordType != IConstants.RECORD_TYPE_COMMAND) {
+            throw new IOException(IConstants.ERR_RECORD_TYPE + pRecordType);
+        }
+        long pOffsetMs = pInput.readLong();
+        int pSynthId = pInput.readInt();
+        int pAction = pInput.readInt();
+        int pNote = pInput.readInt();
+        int pDurMs = pInput.readInt();
+        float pVelocity = pInput.readFloat();
+        float pTimbre1 = pInput.readFloat();
+        float pTimbre2 = pInput.readFloat();
+        float pTimbre3 = pInput.readFloat();
+        if (pOffsetMs < IConstants.ZERO_LONG) {
+            throw new IOException(IConstants.ERR_RECORD_TYPE);
+        }
+        return new SynthEvent(
+                pOffsetMs,
+                pSynthId,
+                pAction,
+                pNote,
+                pDurMs,
+                pVelocity,
+                pTimbre1,
+                pTimbre2,
+                pTimbre3);
+    }
+
     static IndexEntry readIndexEntry(RandomAccessFile pInput) throws IOException {
         return new IndexEntry(readFixedName(pInput), pInput.readLong());
     }
@@ -133,6 +178,14 @@ final class RecordingFileFormat {
     record IndexEntry(String name, long headerPosition) {
     }
 
+<<<<<<< HEAD
     record HeaderEntry(String name, long startOffset, long endOffset, long recordedAtEpochMillis) {
+=======
+    record HeaderEntry(
+            String name,
+            long startOffset,
+            long endOffset,
+            long recordedAtEpochMillis) {
+>>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
     }
 }

@@ -1,7 +1,7 @@
 ---
 id: ft-11
 layer: backend
-status: draft
+status: approved
 ---
 
 # Cargar y reproducir grabaciones

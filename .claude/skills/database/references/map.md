@@ -20,9 +20,15 @@ Persistence contract for a recording lifecycle. `src/main/java/powerband/reposit
 - `finalizeRecording(String pName): RecordingInfo` — writes the final header, sorted index entry, and chronological list row.
 - `containsName(String pName): boolean` — checks the disk index.
 - `findHeaderPosition(String pName): long` — binary-searches the index or throws `RecordingNotFoundException`.
+<<<<<<< HEAD
 - `listRecordings(): List<RecordingInfo>` — reads the chronological list file.
 - `readEvents(String pName): List<SynthEvent>` — reads validated command records bounded by a recording header.
 - `saveCopy(String pName, List<SynthEvent> pEvents, long pRecordedAtEpochMillis): RecordingInfo` — appends a copy and transactionally updates the index and list.
+=======
+- `listRecordings(): List<RecordingInfo>` — reads chronological recording rows from `recordings.list`.
+- `loadRecording(String pName): LoadedRecording` — resolves the name and validates the binary music header.
+- `readCommands(long pStartOffset, long pEndOffset): List<SynthEvent>` — reads one bounded playback buffer.
+>>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
 
 ### BinaryRecordingRepository
 Implements recording files, serialization, duplicate lookup, and transactional finalization. `src/main/java/powerband/repository/BinaryRecordingRepository.java`
@@ -35,9 +41,15 @@ Implements recording files, serialization, duplicate lookup, and transactional f
 - `finalizeRecording(String pName): RecordingInfo` — finalizes music, index, and list files.
 - `containsName(String pName): boolean` — checks for a name with disk binary search.
 - `findHeaderPosition(String pName): long` — returns the header offset or throws not-found.
+<<<<<<< HEAD
 - `listRecordings(): List<RecordingInfo>` — parses `recordings.list` without changing chronological order.
 - `readEvents(String pName): List<SynthEvent>` — uses disk binary search, validates header bounds, and reads only that recording's command records.
 - `saveCopy(String pName, List<SynthEvent> pEvents, long pRecordedAtEpochMillis): RecordingInfo` — appends a fixed-record copy and rolls back appended music on failed finalization.
+=======
+- `listRecordings(): List<RecordingInfo>` — returns chronological rows from the text list.
+- `loadRecording(String pName): LoadedRecording` — validates and loads a fixed header and byte bounds.
+- `readCommands(long pStartOffset, long pEndOffset): List<SynthEvent>` — reads up to `PLAYBACK_BUFFER_SIZE` command records.
+>>>>>>> 610fc0b32360ae0d30055cdda2e4bfc30343954a
 
 ### BalancedMergeSort
 Package-private external balanced merge sorter using two input and two output tapes. `src/main/java/powerband/repository/BalancedMergeSort.java`
