@@ -379,5 +379,6 @@ public interface IConstants {
     public static final String ERR_RECORDING_BUSY = "Termine la grabación actual antes de realizar esta operación.";
     public static final String ERR_PLAYBACK_UNAVAILABLE = "El reproductor de sintetizadores no está configurado.";
     public static final String ERR_PLAYBACK_ACTIVE = "Ya hay una reproducción en curso.";
+    public static final String ERR_PLAYBACK_NOT_LOADED = "Primero cargue una grabación para reproducirla.";
     public static final String ERR_INVALID_EDITED_RECORDING = "Los cambios contienen valores inválidos o tiempos desordenados.";
 }

@@ -9,6 +9,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.function.LongSupplier;
 
 import powerband.dto.RecordingInfo;
+import powerband.dto.LoadedRecording;
 import powerband.dto.SynthEvent;
 import powerband.exception.DuplicateNameException;
 import powerband.exception.InvalidNameException;
@@ -32,6 +33,7 @@ public final class RecordingService {
     private long pausedAtNanos;
     private long totalPausedNanos;
     private Thread playbackThread;
+    private LoadedRecording loadedRecording;
 
     public RecordingService(RecordingRepository pRepository) {
         this(pRepository, null, System::nanoTime, System::currentTimeMillis);
@@ -69,6 +71,7 @@ public final class RecordingService {
         pausedAtNanos = IConstants.ZERO_LONG;
         totalPausedNanos = IConstants.ZERO_LONG;
         paused = false;
+        loadedRecording = null;
         recording = true;
     }
 
@@ -150,7 +153,14 @@ public final class RecordingService {
     public synchronized List<SynthEvent> loadRecording(String pName)
             throws RecordingException, RecordingNotFoundException {
         ensureNoRecordingOperation();
-        return repository.readEvents(validateName(pName));
+        if (playbackThread != null && playbackThread.isAlive()) {
+            throw new RecordingException(IConstants.ERR_PLAYBACK_ACTIVE);
+        }
+        String pValidatedName = validateName(pName);
+        LoadedRecording pLoadedRecording = repository.loadRecording(pValidatedName);
+        List<SynthEvent> pEvents = repository.readEvents(pValidatedName);
+        loadedRecording = pLoadedRecording;
+        return pEvents;
     }
 
     public synchronized RecordingInfo saveEditedCopy(
@@ -179,6 +189,31 @@ public final class RecordingService {
         Thread pThread = Thread.ofVirtual()
                 .name(IConstants.PLAYBACK_THREAD_NAME)
                 .unstarted(() -> playEvents(pValidatedEvents, pCompletion));
+        playbackThread = pThread;
+        pThread.start();
+        return pCompletion;
+    }
+
+    public synchronized LoadedRecording getLoadedRecording() {
+        return loadedRecording;
+    }
+
+    public synchronized CompletableFuture<Void> playLoadedRecording() throws RecordingException {
+        ensureNoRecordingOperation();
+        if (synthCommandRegistry == null) {
+            throw new RecordingException(IConstants.ERR_PLAYBACK_UNAVAILABLE);
+        }
+        if (playbackThread != null && playbackThread.isAlive()) {
+            throw new RecordingException(IConstants.ERR_PLAYBACK_ACTIVE);
+        }
+        if (loadedRecording == null) {
+            throw new RecordingException(IConstants.ERR_PLAYBACK_NOT_LOADED);
+        }
+        LoadedRecording pLoadedRecording = loadedRecording;
+        CompletableFuture<Void> pCompletion = new CompletableFuture<>();
+        Thread pThread = Thread.ofVirtual()
+                .name(IConstants.PLAYBACK_THREAD_NAME)
+                .unstarted(() -> playLoadedEvents(pLoadedRecording, pCompletion));
         playbackThread = pThread;
         pThread.start();
         return pCompletion;
@@ -292,27 +327,87 @@ public final class RecordingService {
         } catch (RuntimeException pException) {
             pPlaybackFailure = new RecordingException(IConstants.ERR_UNKNOWN_RECORDING, pException);
         } finally {
-            try {
-                synthCommandRegistry.stopAll();
-            } catch (RuntimeException pException) {
-                RecordingException pCleanupFailure =
-                        new RecordingException(IConstants.ERR_UNKNOWN_RECORDING, pException);
-                if (pPlaybackFailure == null) {
-                    pPlaybackFailure = pCleanupFailure;
-                } else {
-                    pPlaybackFailure.addSuppressed(pCleanupFailure);
+            completePlayback(pCompletion, pPlaybackFailure);
+        }
+    }
+
+    private void playLoadedEvents(
+            LoadedRecording pLoadedRecording,
+            CompletableFuture<Void> pCompletion) {
+        Throwable pPlaybackFailure = null;
+        long pPlaybackStart = System.nanoTime();
+        long pCursor = pLoadedRecording.headerPosition() + IConstants.MUSIC_RECORD_SIZE;
+        long pPreviousOffset = IConstants.ZERO_LONG;
+        try {
+            while (pCursor < pLoadedRecording.endOffset()) {
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new InterruptedException();
                 }
-            } finally {
-                synchronized (this) {
-                    if (playbackThread == Thread.currentThread()) {
-                        playbackThread = null;
+                List<SynthEvent> pChunk = repository.readCommands(
+                        pCursor,
+                        pLoadedRecording.endOffset());
+                if (pChunk.isEmpty()) {
+                    throw new RecordingException(IConstants.ERR_MUSIC_IO);
+                }
+                List<SynthEvent> pValidatedEvents = validateEvents(pChunk);
+                if (pValidatedEvents.getFirst().offsetMs() < pPreviousOffset) {
+                    throw new RecordingException(IConstants.ERR_INVALID_EDITED_RECORDING);
+                }
+                for (SynthEvent pEvent : pValidatedEvents) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        throw new InterruptedException();
                     }
+                    long pTargetDelay = Math.multiplyExact(
+                            pEvent.offsetMs(),
+                            IConstants.NANOS_PER_MILLI);
+                    waitUntil(pPlaybackStart, pTargetDelay);
+                    if (Thread.currentThread().isInterrupted()) {
+                        throw new InterruptedException();
+                    }
+                    synthCommandRegistry.execute(pEvent);
+                    pPreviousOffset = pEvent.offsetMs();
                 }
-                if (pPlaybackFailure == null) {
-                    pCompletion.complete(null);
-                } else {
-                    pCompletion.completeExceptionally(pPlaybackFailure);
+                pCursor += (long) pValidatedEvents.size() * IConstants.MUSIC_RECORD_SIZE;
+            }
+        } catch (InterruptedException pException) {
+            Thread.currentThread().interrupt();
+            pPlaybackFailure = new CancellationException(IConstants.LBL_PLAYBACK_STOPPED);
+        } catch (ArithmeticException pException) {
+            pPlaybackFailure = new RecordingException(IConstants.ERR_INVALID_EDITED_RECORDING, pException);
+        } catch (RecordingException pException) {
+            pPlaybackFailure = pException;
+        } catch (SynthException pException) {
+            pPlaybackFailure = new RecordingException(IConstants.ERR_SC_SEND, pException);
+        } catch (RuntimeException pException) {
+            pPlaybackFailure = new RecordingException(IConstants.ERR_UNKNOWN_RECORDING, pException);
+        } finally {
+            completePlayback(pCompletion, pPlaybackFailure);
+        }
+    }
+
+    private void completePlayback(
+            CompletableFuture<Void> pCompletion,
+            Throwable pPlaybackFailure) {
+        try {
+            synthCommandRegistry.stopAll();
+        } catch (RuntimeException pException) {
+            RecordingException pCleanupFailure =
+                    new RecordingException(IConstants.ERR_UNKNOWN_RECORDING, pException);
+            if (pPlaybackFailure == null) {
+                pPlaybackFailure = pCleanupFailure;
+            } else {
+                pPlaybackFailure.addSuppressed(pCleanupFailure);
+            }
+        } finally {
+            synchronized (this) {
+                if (playbackThread == Thread.currentThread()) {
+                    playbackThread = null;
                 }
+            }
+            if (pPlaybackFailure == null) {
+                pCompletion.complete(null);
+            } else {
+                pCompletion.completeExceptionally(pPlaybackFailure);
             }
         }
     }

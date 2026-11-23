@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import powerband.dto.RecordingInfo;
+import powerband.dto.LoadedRecording;
 import powerband.dto.SynthEvent;
 import powerband.exception.DuplicateNameException;
 import powerband.exception.InvalidNameException;
@@ -32,6 +33,7 @@ import powerband.helpers.FakeOscTransport;
 import powerband.osc.OscClient;
 import powerband.synth.PianoCommand;
 import powerband.synth.SynthCommandRegistry;
+import powerband.util.IConstants;
 
 class RecordingServiceTest {
 
@@ -218,6 +220,28 @@ class RecordingServiceTest {
         assertEquals(2, pTransport.getSent().size());
     }
 
+    @Test
+    void streamsLoadedRecordingThroughSynthRegistry() throws Exception {
+        FakeOscTransport pTransport = new FakeOscTransport();
+        SynthCommandRegistry pRegistry = new SynthCommandRegistry();
+        pRegistry.register(new PianoCommand(new OscClient(pTransport)));
+        repository.names.add("original");
+        repository.recordings.put("original", List.of(
+                new SynthEvent(0, SYNTH_PIANO_ID, ACTION_PLAY, 48, 10, 0.5f, 0f, 0f, 0f),
+                new SynthEvent(0, SYNTH_PIANO_ID, ACTION_PLAY, 52, 10, 0.5f, 0f, 0f, 0f)));
+        RecordingService pPlaybackService = new RecordingService(
+                repository,
+                pRegistry,
+                monotonicClock::get,
+                wallClock::get);
+
+        pPlaybackService.loadRecording("original");
+        pPlaybackService.playLoadedRecording().get(2, TimeUnit.SECONDS);
+
+        assertEquals(2, pTransport.getSent().size());
+        assertEquals("original", pPlaybackService.getLoadedRecording().name());
+    }
+
     private SynthEvent event(int pNote) {
         return new SynthEvent(0L, SYNTH_ORGAN_ID, ACTION_ON, pNote, 0, 0.8f, 0.2f, 0.3f, 0.4f);
     }
@@ -227,6 +251,7 @@ class RecordingServiceTest {
         private final Set<String> names = new HashSet<>();
         private final List<SynthEvent> events = new ArrayList<>();
         private final Map<String, List<SynthEvent>> recordings = new java.util.HashMap<>();
+        private List<SynthEvent> commandsForRead = List.of();
         private boolean stopped;
         private boolean discarded;
         private int discardCount;
@@ -292,6 +317,28 @@ class RecordingServiceTest {
                 throw new RecordingNotFoundException(pName);
             }
             return List.copyOf(recordings.get(pName));
+        }
+
+        @Override
+        public LoadedRecording loadRecording(String pName) throws RecordingNotFoundException {
+            if (!recordings.containsKey(pName)) {
+                throw new RecordingNotFoundException(pName);
+            }
+            commandsForRead = List.copyOf(recordings.get(pName));
+            long pEndOffset = (commandsForRead.size() + 1L) * IConstants.MUSIC_RECORD_SIZE;
+            return new LoadedRecording(pName, 0L, pEndOffset, 0L);
+        }
+
+        @Override
+        public List<SynthEvent> readCommands(long pStartOffset, long pEndOffset) {
+            int pStartIndex = (int) (pStartOffset / IConstants.MUSIC_RECORD_SIZE) - 1;
+            int pCount = Math.min(
+                    IConstants.PLAYBACK_BUFFER_SIZE,
+                    commandsForRead.size() - pStartIndex);
+            if (pCount <= 0) {
+                return List.of();
+            }
+            return List.copyOf(commandsForRead.subList(pStartIndex, pStartIndex + pCount));
         }
 
         @Override

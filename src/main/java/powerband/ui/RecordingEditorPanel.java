@@ -409,7 +409,10 @@ public final class RecordingEditorPanel extends JPanel {
             return;
         }
         try {
-            CompletableFuture<Void> pPlayback = recordingService.playRecording(pEvents);
+            CompletableFuture<Void> pPlayback = !timelineModel.isDirty()
+                    && recordingService.getLoadedRecording() != null
+                            ? recordingService.playLoadedRecording()
+                            : recordingService.playRecording(pEvents);
             statusLabel.setText(String.format(IConstants.LBL_PLAYING, loadedName));
             pPlayback.whenComplete((pResult, pFailure) -> SwingUtilities.invokeLater(() -> {
                 if (pFailure == null) {
@@ -522,6 +525,7 @@ public final class RecordingEditorPanel extends JPanel {
     private final class TimelineTableModel extends AbstractTableModel {
 
         private final List<SynthEvent> events = new ArrayList<>();
+        private boolean dirty;
         private final String[] columnNames = {
                 IConstants.COL_TIME,
                 IConstants.COL_SYNTH,
@@ -606,6 +610,7 @@ public final class RecordingEditorPanel extends JPanel {
                     default -> pPrevious;
                 };
                 events.set(pRowIndex, pUpdated);
+                dirty = true;
                 fireTableCellUpdated(pRowIndex, pColumnIndex);
                 statusLabel.setText(IConstants.MSG_EDITED_COPY_ONLY);
             } catch (NumberFormatException pException) {
@@ -616,7 +621,12 @@ public final class RecordingEditorPanel extends JPanel {
         private void replaceEvents(List<SynthEvent> pEvents) {
             events.clear();
             events.addAll(pEvents);
+            dirty = false;
             fireTableDataChanged();
+        }
+
+        private boolean isDirty() {
+            return dirty;
         }
 
         private List<SynthEvent> snapshot() {

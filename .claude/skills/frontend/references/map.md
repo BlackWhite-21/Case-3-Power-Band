@@ -8,6 +8,7 @@ Source: `src/main/java/powerband/ui`
 - Three-page Swing editor (Editor, Grabadora, Reproductor), editable command timeline, asynchronous actions, and copy-save flow in `RecordingEditorPanel.java`.
 - Recording start/stop and pause/resume appear only on Grabadora. Stopping asks whether to save; declining discards the provisional recording, while accepting prompts for a name.
 - Loading, playback, and playback stop appear in Reproductor.
+- The original loaded timeline uses bounded-buffer playback; edited timeline events play from the working copy.
 - Window close is intercepted to confirm before discarding an active or unnamed recording; otherwise the application shutdown handler controls disposal.
 - Application window wrapper in `RecordingEditorFrame.java`.
 

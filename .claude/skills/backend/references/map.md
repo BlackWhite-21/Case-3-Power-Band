@@ -8,6 +8,7 @@ Source: `src/main/java/powerband`
 - OSC encoder, UDP transport/client, Bridge synth commands, Huion pointer-to-instrument adapter and mapper, microphone capture/analyzer, DTOs, exceptions, and constants in `src/main/java/powerband/`.
 - `Main` composes the recording service, playback registry for all five synths, Swing editor, OSC client, Huion saxophone instrument, and default-microphone violin instrument.
 - Recording capture, pause/resume timing, name validation, loading, edited-copy coordination, unsaved-capture discard, and asynchronous timed playback in `src/main/java/powerband/service/RecordingService.java`.
+- Original loaded recordings stream from validated header bounds in fixed command buffers; edited timeline copies continue to play from the working event list.
 - The microphone worker suppresses read/close errors caused by an intentional stop while still reporting failures during active capture.
 - Binary persistence is in `src/main/java/powerband/repository/`; the recording UI is in `src/main/java/powerband/ui/`.
 - No joystick instrument exists yet.
@@ -119,6 +120,10 @@ Huion pen state enum. `src/main/java/powerband/dto/EstadoPluma.java`
 Recording-list row model. `src/main/java/powerband/dto/RecordingInfo.java`
 - `toString(): String` — formats the date and recording name for display.
 - Record accessors: `name(): String` and `recordedAt(): String`.
+
+### LoadedRecording
+Validated recording header and exclusive byte bounds for buffered playback. `src/main/java/powerband/dto/LoadedRecording.java`
+- Record accessors: `name(): String`, `headerPosition(): long`, `endOffset(): long`, and `recordedAtEpochMillis(): long`.
 
 ### PowerBandException
 Checked root for project exceptions. `src/main/java/powerband/exception/PowerBandException.java`
@@ -248,8 +253,10 @@ Coordinates capture, monotonic offsets, recording names, loading, edited copies,
 - `saveRecording(String pName): RecordingInfo` — validates uniqueness and finalizes the pending recording.
 - `listRecordings(): List<RecordingInfo>` — returns recordings in chronological list-file order.
 - `loadRecording(String pName): List<SynthEvent>` — loads validated commands for one saved recording.
+- `getLoadedRecording(): LoadedRecording` — returns the validated metadata for the selected recording.
 - `saveEditedCopy(String pSourceName, String pCopyName, List<SynthEvent> pEvents): RecordingInfo` — validates and saves edited commands as a separate recording.
 - `playRecording(List<SynthEvent> pEvents): CompletableFuture<Void>` — dispatches commands at their recorded offsets on a virtual thread.
+- `playLoadedRecording(): CompletableFuture<Void>` — plays the loaded recording in bounded repository buffers.
 - `stopPlayback(): void` — interrupts active timed playback.
 - `isPlaying(): boolean` — reports whether playback is active.
 - `synthName(int pSynthId): String` — resolves the display name for a registered synth ID.

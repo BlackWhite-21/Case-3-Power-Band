@@ -14,6 +14,7 @@ import static powerband.util.IConstants.MERGE_TAPES;
 import static powerband.util.IConstants.MUSIC_FILE;
 import static powerband.util.IConstants.MUSIC_RECORD_SIZE;
 import static powerband.util.IConstants.NAME_LENGTH;
+import static powerband.util.IConstants.PLAYBACK_BUFFER_SIZE;
 import static powerband.util.IConstants.RECORD_TYPE_COMMAND;
 import static powerband.util.IConstants.RECORD_TYPE_HEADER;
 import static powerband.util.IConstants.SYNTH_SAXOPHONE_ID;
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import powerband.dto.RecordingInfo;
+import powerband.dto.LoadedRecording;
 import powerband.dto.SynthEvent;
 import powerband.exception.DuplicateNameException;
 import powerband.exception.RecordingException;
@@ -171,6 +173,41 @@ class BinaryRecordingRepositoryTest {
         assertEquals(List.of("original", "editada"),
                 repository.listRecordings().stream().map(RecordingInfo::name).toList());
         assertEquals(INDEX_RECORD_SIZE * 2, Files.size(dataDirectory.resolve(INDEX_FILE)));
+    }
+
+    @Test
+    void loadsHeaderAndReadsCommandsInBoundedBuffers() throws Exception {
+        long pRecordedAt = Instant.parse("2026-11-22T18:00:00Z").toEpochMilli();
+        int pEventCount = PLAYBACK_BUFFER_SIZE * 2 + 1;
+        List<SynthEvent> pExpectedEvents = new ArrayList<>();
+        repository.beginRecording(pRecordedAt);
+        for (int pIndex = 0; pIndex < pEventCount; pIndex++) {
+            SynthEvent pEvent = new SynthEvent(pIndex, SYNTH_SAXOPHONE_ID, ACTION_ON,
+            60, 0, 0.75f, 0.1f, 0.2f, 0.3f);
+            repository.appendEvent(pEvent);
+            pExpectedEvents.add(pEvent);
+        }
+        repository.stopRecording();
+        repository.finalizeRecording("concierto");
+
+        LoadedRecording pLoaded = repository.loadRecording("concierto");
+        long pCursor = pLoaded.headerPosition() + MUSIC_RECORD_SIZE;
+        List<SynthEvent> pReadEvents = new ArrayList<>();
+        while (pCursor < pLoaded.endOffset()) {
+            List<SynthEvent> pChunk = repository.readCommands(pCursor, pLoaded.endOffset());
+            assertTrue(pChunk.size() <= PLAYBACK_BUFFER_SIZE);
+            assertFalse(pChunk.isEmpty());
+            pReadEvents.addAll(pChunk);
+            pCursor += (long) pChunk.size() * MUSIC_RECORD_SIZE;
+        }
+
+        assertEquals("concierto", pLoaded.name());
+        assertEquals(pRecordedAt, pLoaded.recordedAtEpochMillis());
+        assertEquals(pExpectedEvents.size(), pReadEvents.size());
+        assertEquals(pExpectedEvents, pReadEvents);
+        assertThrows(RecordingException.class, () -> repository.readCommands(
+        pLoaded.headerPosition(),
+        pLoaded.endOffset()));
     }
 
     @Test

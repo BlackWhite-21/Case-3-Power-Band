@@ -92,6 +92,7 @@ Binary files, search, index sorting, chronological list, and persistence-failure
 - `writesFixedSizeHeaderCommandsIndexAndChronologicalList(): void` — checks fixed record sizes, serialized fields, and file contents.
 - `balancedMergeSortOrdersDiskIndexAndListKeepsRecordingOrder(): void` — checks disk-index order after each save and recording-order list.
 - `readsAndAppendsEditedCopyWithoutChangingSourceRecording(): void` — checks bounded command reads, copy persistence, and source immutability.
+- `loadsHeaderAndReadsCommandsInBoundedBuffers(): void` — checks validated recording metadata and command buffers no larger than the configured maximum.
 - `duplicateCopyNameDoesNotAppendPartialMusic(): void` — checks duplicate rejection without a partial append.
 - `discardsActiveRecordingAndPreservesPreviouslySavedRecords(): void` — checks active-capture rollback preserves earlier recordings.
 - `discardsStoppedRecordingAwaitingName(): void` — checks unnamed stopped-capture rollback.
@@ -113,6 +114,7 @@ Recording lifecycle, pause timing, name validation, edited copies, and playback 
 - `keepsEditedEventsAvailableWhenCopyNameIsDuplicated(): void` — checks duplicate-name retry behavior.
 - `rejectsUnorderedOrInvalidEditedEvents(): void` — checks edited-event validation.
 - `playsEventsThroughSynthRegistryAndCompletesAfterDispatch(): void` — checks timed event dispatch through a fake OSC transport.
+- `streamsLoadedRecordingThroughSynthRegistry(): void` — checks loaded recordings can play through the repository-backed playback path.
 
 ### RecordingEditorPanelTest
 Headless Swing branding, page-specific control structure, and editable timeline tests. `src/test/java/powerband/ui/RecordingEditorPanelTest.java`
