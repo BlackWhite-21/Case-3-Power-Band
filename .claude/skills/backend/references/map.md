@@ -119,6 +119,10 @@ Recording-list row model. `src/main/java/powerband/dto/RecordingInfo.java`
 - `toString(): String` — formats the date and recording name for display.
 - Record accessors: `name(): String` and `recordedAt(): String`.
 
+### LoadedRecording
+Loaded music header and playback bounds. `src/main/java/powerband/dto/LoadedRecording.java`
+- Record accessors: `name(): String`, `headerPosition(): long`, `endOffset(): long`, and `recordedAtEpochMillis(): long`.
+
 ### PowerBandException
 Checked root for project exceptions. `src/main/java/powerband/exception/PowerBandException.java`
 - Constructors accept a message, or a message and cause.
@@ -244,3 +248,10 @@ Coordinates event capture, monotonic offsets, recording names, and repository fi
 - `saveRecording(String pName): RecordingInfo` — validates uniqueness and finalizes the pending recording.
 - `isRecording(): boolean` — reports whether event capture is active.
 - `hasPendingName(): boolean` — reports whether a stopped capture still needs a name.
+- `listRecordings(): List<RecordingInfo>` — reads the chronologically ordered recording list.
+- `loadRecording(String pName): LoadedRecording` — resolves and validates a recording for playback.
+- `setPlaybackListener(Consumer<PowerBandException> pListener): void` — registers asynchronous playback failures.
+- `getLoadedRecording(): LoadedRecording` — returns the current loaded recording.
+- `isPlaying(): boolean` — reports playback activity.
+- `playLoadedRecording(): void` — starts timed buffered playback in a daemon thread.
+- `stopPlayback(): void` — interrupts playback and stops active synth commands.

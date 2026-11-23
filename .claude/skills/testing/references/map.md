@@ -92,6 +92,7 @@ Binary files, search, index sorting, chronological list, and persistence-failure
 - `findsSavedRecordingAfterRepositoryIsReopened(): void` — checks persistent binary search with a new repository instance.
 - `failedListWriteDoesNotReportSuccessAndKeepsRecordingAvailableForRetry(): void` — checks rollback and retry after a list-file I/O failure.
 - `reportsMissingNamesAndRejectsBrokenMusicFile(): void` — checks not-found and I/O error reporting.
+- `listsLoadsAndReadsCommandsWithoutLeavingRecordingBounds(): void` — checks chronological listing, header loading, and bounded command reads.
 
 ### RecordingServiceTest
 Recording lifecycle, relative timing, and name-validation tests with an in-memory repository fake. `src/test/java/powerband/service/RecordingServiceTest.java`
@@ -100,6 +101,8 @@ Recording lifecycle, relative timing, and name-validation tests with an in-memor
 - `rejectsInvalidAndDuplicateNamesButPreservesPendingRecordingForRetry(): void` — checks validation and retry behavior.
 - `rejectsEmptyAndOverlongNames(): void` — checks name bounds.
 - `rejectsStopAndSaveWithoutAnActiveOrPendingRecording(): void` — checks invalid lifecycle operations.
+- `listsAndLoadsRecordingButRejectsPlaybackDuringCapture(): void` — checks listing/loading and capture restrictions.
+- `playbackStopsPendingEvents(): void` — checks interrupted playback without pending command execution.
 
 ### FakeOscTransport
 Captures packets for tests. `src/test/java/powerband/helpers/FakeOscTransport.java`

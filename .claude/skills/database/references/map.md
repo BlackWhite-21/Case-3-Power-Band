@@ -19,6 +19,9 @@ Persistence contract for a recording lifecycle. `src/main/java/powerband/reposit
 - `finalizeRecording(String pName): RecordingInfo` — writes the final header, sorted index entry, and chronological list row.
 - `containsName(String pName): boolean` — checks the disk index.
 - `findHeaderPosition(String pName): long` — binary-searches the index or throws `RecordingNotFoundException`.
+- `listRecordings(): List<RecordingInfo>` — reads chronological recording rows from `recordings.list`.
+- `loadRecording(String pName): LoadedRecording` — resolves the name and validates the binary music header.
+- `readCommands(long pStartOffset, long pEndOffset): List<SynthEvent>` — reads one bounded playback buffer.
 
 ### BinaryRecordingRepository
 Implements recording files, serialization, duplicate lookup, and transactional finalization. `src/main/java/powerband/repository/BinaryRecordingRepository.java`
@@ -30,6 +33,9 @@ Implements recording files, serialization, duplicate lookup, and transactional f
 - `finalizeRecording(String pName): RecordingInfo` — finalizes music, index, and list files.
 - `containsName(String pName): boolean` — checks for a name with disk binary search.
 - `findHeaderPosition(String pName): long` — returns the header offset or throws not-found.
+- `listRecordings(): List<RecordingInfo>` — returns chronological rows from the text list.
+- `loadRecording(String pName): LoadedRecording` — validates and loads a fixed header and byte bounds.
+- `readCommands(long pStartOffset, long pEndOffset): List<SynthEvent>` — reads up to `PLAYBACK_BUFFER_SIZE` command records.
 
 ### BalancedMergeSort
 Package-private external balanced merge sorter using two input and two output tapes. `src/main/java/powerband/repository/BalancedMergeSort.java`

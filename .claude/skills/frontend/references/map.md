@@ -12,6 +12,7 @@ Source: `src/main/java/powerband/ui`
 ### RecordingEditorPanel
 Swing controls for starting/stopping a recording and assigning its name. `src/main/java/powerband/ui/RecordingEditorPanel.java`
 - `RecordingEditorPanel(RecordingService pRecordingService)` — creates the editor panel for a recording service.
+- Adds `Cargar...`, `Play`, and `Stop` controls for chronological listing, loading, timed playback, and cancellation.
 
 ### RecordingEditorFrame
 Window wrapper for the recording panel. `src/main/java/powerband/ui/RecordingEditorFrame.java`
