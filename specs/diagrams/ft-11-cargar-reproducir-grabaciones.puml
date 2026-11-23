@@ -1,0 +1,39 @@
+@startuml ft-11-cargar-reproducir-grabaciones
+title ft-11 - Cargar y reproducir grabaciones
+hide footbox
+
+actor Usuario
+participant "RecordingEditorPanel" as UI
+participant RecordingService as Service
+participant RecordingRepository as Repo
+participant "SynthCommandRegistry" as Registry
+database "recordings.list" as List
+database "recordings.index" as Index
+database "recordings.music" as Music
+
+Usuario -> UI: Cargar...
+UI -> Service: listRecordings()
+Service -> Repo: listRecordings()
+Repo -> List: leer en orden cronologico
+Service --> UI: List<RecordingInfo>
+
+Usuario -> UI: seleccionar nombre
+UI -> Service: loadRecording(name)
+Service -> Repo: findHeaderPosition(name)
+Repo -> Index: busqueda binaria en disco
+Service -> Repo: readRecording(headerPosition)
+Repo -> Music: leer header y validar limites
+Service --> UI: grabacion cargada
+
+Usuario -> UI: Play
+UI -> Service: playLoadedRecording()
+Service -> Repo: readCommands(start, end)
+loop por comando
+  Service -> Service: sleep(intervalo acumulado)
+  Service -> Registry: execute(SynthEvent)
+end
+
+Usuario -> UI: Stop
+UI -> Service: stopPlayback()
+Service -> Service: solicitar interrupcion
+@enduml
