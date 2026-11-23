@@ -307,4 +307,5 @@ public interface IConstants {
     public static final String ERR_RECORD_TYPE = "Tipo de registro inesperado: ";
     public static final String ERR_NOTHING_LOADED = "Primero cargue una grabación.";
     public static final String ERR_UNKNOWN_RECORDING = "Error inesperado al guardar la grabación.";
+    public static final String ERR_UNKNOWN_APPLICATION = "Error inesperado en Power Band.";
 }

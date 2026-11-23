@@ -27,6 +27,7 @@ import powerband.util.IConstants;
 
 final class JnaPointerInputSource implements PointerEventSource {
 
+    private final WindowsPointerApi windowsPointerApiOverride;
     private final ArrayBlockingQueue<NativePointerEvent> events =
             new ArrayBlockingQueue<>(IConstants.HUION_POINTER_QUEUE_CAPACITY);
     private final AtomicReference<DeviceException> failure = new AtomicReference<>();
@@ -36,12 +37,21 @@ final class JnaPointerInputSource implements PointerEventSource {
     private volatile Window window;
     private volatile Pointer windowHandle;
     private volatile Pointer hookHandle;
+    private volatile PointerHook hookProcedure;
     private volatile boolean stopping;
     private boolean detaching;
     private int activeCallbacks;
     private volatile int lastPenPointerId = IConstants.HUION_NO_ACTIVE_POINTER;
     private volatile int lastClientX;
     private volatile int lastClientY;
+
+    JnaPointerInputSource() {
+        this(null);
+    }
+
+    JnaPointerInputSource(WindowsPointerApi pWindowsPointerApiOverride) {
+        windowsPointerApiOverride = pWindowsPointerApiOverride;
+    }
 
     @Override
     public void attach(Component pComponent) throws DeviceException {
@@ -67,24 +77,39 @@ final class JnaPointerInputSource implements PointerEventSource {
                 throw new DeviceException(IConstants.ERR_HUION_POINTER_INITIALIZE);
             }
 
-            PointerHook pHookProcedure = this::onGetMessage;
-            Pointer pHookHandle = pWindowsPointerApi.SetWindowsHookExW(
-                    IConstants.HUION_POINTER_HOOK_GET_MESSAGE,
-                    pHookProcedure,
-                    null,
+            installHook(
+                    pWindowsPointerApi,
+                    pComponent,
+                    pWindow,
+                    pWindowHandle,
                     pWindowThreadId);
-            if (pHookHandle == null
-                    || Pointer.nativeValue(pHookHandle) == IConstants.NATIVE_NULL_POINTER) {
-                throw new DeviceException(IConstants.ERR_HUION_POINTER_INITIALIZE);
-            }
-            this.component = pComponent;
-            this.window = pWindow;
-            this.windowHandle = pWindowHandle;
-            this.windowsPointerApi = pWindowsPointerApi;
-            this.hookHandle = pHookHandle;
         } catch (UnsatisfiedLinkError | IllegalArgumentException e) {
             throw new DeviceException(IConstants.ERR_HUION_POINTER_API, e);
         }
+    }
+
+    void installHook(
+            WindowsPointerApi pWindowsPointerApi,
+            Component pComponent,
+            Window pWindow,
+            Pointer pWindowHandle,
+            int pWindowThreadId) throws DeviceException {
+        PointerHook pHookProcedure = this::onGetMessage;
+        Pointer pHookHandle = pWindowsPointerApi.SetWindowsHookExW(
+                IConstants.HUION_POINTER_HOOK_GET_MESSAGE,
+                pHookProcedure,
+                null,
+                pWindowThreadId);
+        if (pHookHandle == null
+                || Pointer.nativeValue(pHookHandle) == IConstants.NATIVE_NULL_POINTER) {
+            throw new DeviceException(IConstants.ERR_HUION_POINTER_INITIALIZE);
+        }
+        component = pComponent;
+        window = pWindow;
+        windowHandle = pWindowHandle;
+        windowsPointerApi = pWindowsPointerApi;
+        hookProcedure = pHookProcedure;
+        hookHandle = pHookHandle;
     }
 
     @Override
@@ -131,6 +156,7 @@ final class JnaPointerInputSource implements PointerEventSource {
                 }
             }
             hookHandle = null;
+            hookProcedure = null;
             windowHandle = null;
             windowsPointerApi = null;
             window = null;
@@ -320,7 +346,10 @@ final class JnaPointerInputSource implements PointerEventSource {
         }
     }
 
-    private static WindowsPointerApi getWindowsPointerApi() throws DeviceException {
+    private WindowsPointerApi getWindowsPointerApi() throws DeviceException {
+        if (windowsPointerApiOverride != null) {
+            return windowsPointerApiOverride;
+        }
         try {
             return WindowsPointerApiHolder.INSTANCE;
         } catch (UnsatisfiedLinkError e) {
@@ -337,12 +366,12 @@ final class JnaPointerInputSource implements PointerEventSource {
                         (FunctionMapper) (pLibrary, pMethod) -> pMethod.getName()));
     }
 
-    private interface PointerHook extends StdCallLibrary.StdCallCallback {
+    interface PointerHook extends StdCallLibrary.StdCallCallback {
 
         Pointer callback(int pCode, Pointer pWParam, Pointer pLParam);
     }
 
-    private interface WindowsPointerApi extends StdCallLibrary {
+    interface WindowsPointerApi extends StdCallLibrary {
 
         boolean GetPointerType(int pPointerId, IntByReference pPointerType);
 

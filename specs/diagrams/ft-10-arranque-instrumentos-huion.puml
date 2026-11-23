@@ -1,0 +1,43 @@
+@startuml ft-10-arranque-instrumentos-huion
+title ft-10 - Arranque de instrumentos y ciclo de vida del hook Huion
+hide footbox
+
+actor Usuario
+participant Main
+participant RecordingEditorFrame
+participant HuionInstrument
+participant TabletaHuionInputSource
+participant TabletaGrafica
+participant JnaPointerInputSource
+participant WindowsPointerAPI
+participant MicrophoneInstrument
+participant OscClient
+
+Usuario -> Main: main(args)
+Main -> RecordingEditorFrame: crear y setVisible()
+par Iniciar Huion fuera del EDT
+  Main -> HuionInstrument: start()
+  HuionInstrument -> TabletaHuionInputSource: start(consumidores)
+  TabletaHuionInputSource -> TabletaGrafica: initialize(componente visible)
+  TabletaGrafica -> JnaPointerInputSource: attach(componente) en EDT
+  JnaPointerInputSource -> WindowsPointerAPI: SetWindowsHookExW(callback)
+  JnaPointerInputSource -> JnaPointerInputSource: retener callback fuertemente
+else Iniciar micrófono
+  Main -> MicrophoneInstrument: start()
+else Verificar SuperCollider
+  Main -> OscClient: ping()
+end
+
+WindowsPointerAPI -> JnaPointerInputSource: eventos WM_POINTER
+JnaPointerInputSource -> TabletaGrafica: encolar lectura
+TabletaGrafica -> HuionInstrument: publicar lectura fuera del EDT
+
+Usuario -> RecordingEditorFrame: cerrar ventana
+Main -> HuionInstrument: stop()
+TabletaGrafica -> JnaPointerInputSource: detach()
+JnaPointerInputSource -> WindowsPointerAPI: UnhookWindowsHookEx()
+JnaPointerInputSource -> JnaPointerInputSource: esperar callbacks activos
+JnaPointerInputSource -> JnaPointerInputSource: liberar callback retenido
+Main -> MicrophoneInstrument: stop()
+Main -> OscClient: close()
+@enduml
