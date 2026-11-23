@@ -5,12 +5,12 @@ After you change this layer, update this file so the next run stays current.
 Source: `src/main/java/powerband/ui`
 
 ## Implemented
-- Swing recording controls, pending-name retry, status feedback, and error dialogs in `RecordingEditorPanel.java`.
-- Frame wrapper in `RecordingEditorFrame.java`.
+- Three-page Swing editor (Editor, Grabadora, Reproductor), editable command timeline, recording/load/play/stop actions, asynchronous service calls, and copy-save flow in `RecordingEditorPanel.java`.
+- Application window wrapper in `RecordingEditorFrame.java`.
 
 ## Classes
 ### RecordingEditorPanel
-Swing controls for starting/stopping a recording and assigning its name. `src/main/java/powerband/ui/RecordingEditorPanel.java`
+Three-page Swing editor with an editable timeline, recording controls, chronological recording selection, playback, and save-as-copy behavior. `src/main/java/powerband/ui/RecordingEditorPanel.java`
 - `RecordingEditorPanel(RecordingService pRecordingService)` — creates the editor panel for a recording service.
 
 ### RecordingEditorFrame

@@ -88,18 +88,29 @@ Asynchronous instrument test with a blocking fake audio source. `src/test/java/p
 Binary files, search, index sorting, chronological list, and persistence-failure tests. `src/test/java/powerband/repository/BinaryRecordingRepositoryTest.java`
 - `writesFixedSizeHeaderCommandsIndexAndChronologicalList(): void` — checks fixed record sizes, serialized fields, and file contents.
 - `balancedMergeSortOrdersDiskIndexAndListKeepsRecordingOrder(): void` — checks disk-index order after each save and recording-order list.
+- `readsAndAppendsEditedCopyWithoutChangingSourceRecording(): void` — checks bounded command reads, copy persistence, and source immutability.
+- `duplicateCopyNameDoesNotAppendPartialMusic(): void` — checks duplicate rejection without a partial append.
 - `duplicateNameKeepsStoppedRecordingAvailableForRetry(): void` — checks duplicate rejection and retry.
 - `findsSavedRecordingAfterRepositoryIsReopened(): void` — checks persistent binary search with a new repository instance.
 - `failedListWriteDoesNotReportSuccessAndKeepsRecordingAvailableForRetry(): void` — checks rollback and retry after a list-file I/O failure.
 - `reportsMissingNamesAndRejectsBrokenMusicFile(): void` — checks not-found and I/O error reporting.
 
 ### RecordingServiceTest
-Recording lifecycle, relative timing, and name-validation tests with an in-memory repository fake. `src/test/java/powerband/service/RecordingServiceTest.java`
+Recording lifecycle, relative timing, name validation, edited copies, and playback tests with an in-memory repository fake. `src/test/java/powerband/service/RecordingServiceTest.java`
 - `recordsMonotonicOffsetsInArrivalOrderAndIgnoresEventsAfterStop(): void` — checks event offsets and stop behavior.
 - `rejectsStartingAnotherRecordingUntilThePendingOneIsSaved(): void` — checks the pending-name lifecycle.
 - `rejectsInvalidAndDuplicateNamesButPreservesPendingRecordingForRetry(): void` — checks validation and retry behavior.
 - `rejectsEmptyAndOverlongNames(): void` — checks name bounds.
 - `rejectsStopAndSaveWithoutAnActiveOrPendingRecording(): void` — checks invalid lifecycle operations.
+- `loadsEventsAndSavesEditedCopyWithoutChangingSource(): void` — checks loading and immutable-copy persistence.
+- `keepsEditedEventsAvailableWhenCopyNameIsDuplicated(): void` — checks duplicate-name retry behavior.
+- `rejectsUnorderedOrInvalidEditedEvents(): void` — checks edited-event validation.
+- `playsEventsThroughSynthRegistryAndCompletesAfterDispatch(): void` — checks timed event dispatch through a fake OSC transport.
+
+### RecordingEditorPanelTest
+Headless Swing branding, page controls, and editable timeline tests. `src/test/java/powerband/ui/RecordingEditorPanelTest.java`
+- `showsTheThreeEditorPagesAndPowerBandBranding(): void` — checks page navigation labels and logo color.
+- `timelineEditsChangeOnlyTheWorkingCopy(): void` — checks editable fields and source-event immutability.
 
 ### FakeOscTransport
 Captures packets for tests. `src/test/java/powerband/helpers/FakeOscTransport.java`

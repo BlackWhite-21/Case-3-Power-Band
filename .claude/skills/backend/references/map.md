@@ -6,8 +6,8 @@ Source: `src/main/java/powerband`
 
 ## Implemented
 - OSC encoder, UDP transport/client, Bridge synth commands, Huion pointer-to-instrument adapter and mapper, microphone capture/analyzer, DTOs, exceptions, and constants in `src/main/java/powerband/`.
-- `Main` composes the recording service, Swing editor, OSC client, Huion saxophone instrument, and default-microphone violin instrument.
-- Recording event timing, name validation, and save coordination in `src/main/java/powerband/service/RecordingService.java`.
+- `Main` composes the recording service, playback registry for all five synths, Swing editor, OSC client, Huion saxophone instrument, and default-microphone violin instrument.
+- Recording capture, name validation, loading, edited-copy coordination, and asynchronous timed playback in `src/main/java/powerband/service/RecordingService.java`.
 - Binary persistence is in `src/main/java/powerband/repository/`; the recording UI is in `src/main/java/powerband/ui/`.
 - No joystick instrument exists yet.
 
@@ -236,11 +236,18 @@ Captures frames and dispatches analyzed notes through the violin command. `src/m
 - `stop(): void` — closes input, waits for the worker, and releases active notes.
 
 ### RecordingService
-Coordinates event capture, monotonic offsets, recording names, and repository finalization. `src/main/java/powerband/service/RecordingService.java`
-- Constructors accept a `RecordingRepository`; a second overload injects monotonic and wall clocks.
+Coordinates capture, monotonic offsets, recording names, loading, edited copies, and timed synth playback. `src/main/java/powerband/service/RecordingService.java`
+- Constructors accept a `RecordingRepository`, optional `SynthCommandRegistry`, and optional monotonic and wall clocks.
 - `startRecording(): void` — starts a capture and records wall-clock and monotonic start times.
 - `onSynthEvent(SynthEvent pEvent): void` — forwards an event with its elapsed recording offset.
 - `stopRecording(): void` — stops accepting events and leaves the capture pending for a name.
 - `saveRecording(String pName): RecordingInfo` — validates uniqueness and finalizes the pending recording.
+- `listRecordings(): List<RecordingInfo>` — returns recordings in chronological list-file order.
+- `loadRecording(String pName): List<SynthEvent>` — loads validated commands for one saved recording.
+- `saveEditedCopy(String pSourceName, String pCopyName, List<SynthEvent> pEvents): RecordingInfo` — validates and saves edited commands as a separate recording.
+- `playRecording(List<SynthEvent> pEvents): CompletableFuture<Void>` — dispatches commands at their recorded offsets on a virtual thread.
+- `stopPlayback(): void` — interrupts active timed playback.
+- `isPlaying(): boolean` — reports whether playback is active.
+- `synthName(int pSynthId): String` — resolves the display name for a registered synth ID.
 - `isRecording(): boolean` — reports whether event capture is active.
 - `hasPendingName(): boolean` — reports whether a stopped capture still needs a name.
