@@ -67,6 +67,17 @@ class SynthCommandTest {
     }
 
     @Test
+    void organAxisUpdateDoesNotRetriggerActiveNote() throws Exception {
+        OrganCommand pOrgan = new OrganCommand(client);
+        pOrgan.execute(event(SYNTH_ORGAN_ID, ACTION_ON, 60));
+        int pSentAfterOn = transport.getSent().size();
+        pOrgan.execute(event(SYNTH_ORGAN_ID, ACTION_ON, 60));
+
+        assertEquals(pSentAfterOn + 5, transport.getSent().size());
+        assertTrue(transport.lastAsText().startsWith("/n_set"));
+    }
+
+    @Test
     void pianoIgnoresNoteOffBecauseItStopsAlone() throws Exception {
         new PianoCommand(client).execute(event(SYNTH_PIANO_ID, ACTION_OFF, 48));
         assertEquals(0, transport.getSent().size());

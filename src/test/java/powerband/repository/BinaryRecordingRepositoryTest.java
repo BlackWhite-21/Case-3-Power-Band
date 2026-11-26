@@ -211,6 +211,22 @@ class BinaryRecordingRepositoryTest {
     }
 
     @Test
+    void binarySearchFindsExactNamesAndRejectsMissingNames() throws Exception {
+        saveRecording("alpha");
+        saveRecording("bravo");
+        saveRecording("charlie");
+        BinaryRecordingRepository pReopened =
+                new BinaryRecordingRepository(dataDirectory);
+
+        assertEquals(ZERO_LONG, pReopened.findHeaderPosition("alpha"));
+        assertEquals(MUSIC_RECORD_SIZE, pReopened.findHeaderPosition("bravo"));
+        assertEquals(MUSIC_RECORD_SIZE * MERGE_TAPES, pReopened.findHeaderPosition("charlie"));
+        assertThrows(
+                RecordingNotFoundException.class,
+                () -> pReopened.findHeaderPosition("brav"));
+    }
+
+    @Test
     void duplicateCopyNameDoesNotAppendPartialMusic() throws Exception {
         saveRecording("ocupada");
         long pOriginalLength = Files.size(dataDirectory.resolve(MUSIC_FILE));

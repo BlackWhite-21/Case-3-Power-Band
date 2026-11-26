@@ -163,6 +163,11 @@ public final class RecordingService {
         return pEvents;
     }
 
+    public synchronized List<SynthEvent> searchRecording(String pName)
+            throws RecordingException, RecordingNotFoundException {
+        return loadRecording(pName);
+    }
+
     public synchronized RecordingInfo saveEditedCopy(
             String pSourceName,
             String pCopyName,

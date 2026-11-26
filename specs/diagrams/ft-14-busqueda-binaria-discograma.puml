@@ -1,0 +1,29 @@
+@startuml ft-14-busqueda-binaria-discograma
+title ft-14 - Búsqueda binaria por nombre
+hide footbox
+
+actor Usuario
+participant "RecordingEditorPanel" as UI
+participant RecordingService as Service
+participant RecordingRepository as Repo
+database "recordings.index" as Index
+database "recordings.music" as Music
+
+Usuario -> UI: buscar nombre
+UI -> Service: loadRecording(name)
+Service -> Repo: findHeaderPosition(name)
+Repo -> Index: búsqueda binaria aleatoria
+Repo -> Index: seek(mid * INDEX_RECORD_SIZE)
+Repo -> Index: leer nombre fijo
+alt coincidencia exacta
+  Repo -> Index: leer headerPosition
+  Repo -> Music: seek(headerPosition)
+  Repo -> Music: leer encabezado fijo
+  Repo -> Music: leer comandos hasta endOffset
+  Repo --> Service: LoadedRecording y eventos
+  Service --> UI: cargar resultados
+else no existe
+  Repo --> Service: RecordingNotFoundException
+  Service --> UI: mostrar error
+end
+@enduml

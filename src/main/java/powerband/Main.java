@@ -17,6 +17,8 @@ import powerband.instrument.DefaultMicrophoneAudioSource;
 import powerband.instrument.HuionInstrument;
 import powerband.instrument.MicrophoneInstrument;
 import powerband.instrument.TabletaHuionInputSource;
+import powerband.instrument.JoystickInstrument;
+import powerband.instrument.WinmmJoystickInputSource;
 import powerband.osc.OscClient;
 import powerband.osc.UdpOscTransport;
 import powerband.repository.BinaryRecordingRepository;
@@ -83,6 +85,16 @@ public final class Main {
                 pViolinCommand,
                 pEventListener,
                 pException -> showError(pFrame, pException));
+        JoystickInstrument pJoystickInstrument = new JoystickInstrument(
+                new WinmmJoystickInputSource(),
+                pOrganCommand,
+                pEventListener,
+                pException -> {
+                    pFrame.setJoystickStatus(
+                            IConstants.STATUS_UNAVAILABLE + pException.getMessage());
+                    showError(pFrame, pException.getMessage());
+                },
+                pState -> pFrame.setJoystickStatus(IConstants.STATUS_ACTIVE));
 
         pFrame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -106,6 +118,7 @@ public final class Main {
                     shutdown(
                             pHuionInstrument,
                             pMicrophoneInstrument,
+                            pJoystickInstrument,
                             pOscClient,
                             pInstrumentLifecycleLock);
                     SwingUtilities.invokeLater(pFrame::dispose);
@@ -124,6 +137,15 @@ public final class Main {
                 pShutdown,
                 pInstrumentLifecycleLock,
                 pException -> showError(pFrame, pException)));
+        Thread.startVirtualThread(() -> startInstrument(
+                pJoystickInstrument::start,
+                pShutdown,
+                pInstrumentLifecycleLock,
+                pException -> {
+                    pFrame.setJoystickStatus(
+                            IConstants.STATUS_UNAVAILABLE + pException.getMessage());
+                    showError(pFrame, pException.getMessage());
+                }));
         Thread.startVirtualThread(() -> pingSuperCollider(pOscClient, pFrame, pShutdown));
     }
 
@@ -248,6 +270,7 @@ public final class Main {
     private static void shutdown(
             HuionInstrument pHuionInstrument,
             MicrophoneInstrument pMicrophoneInstrument,
+            JoystickInstrument pJoystickInstrument,
             OscClient pOscClient,
             Object pInstrumentLifecycleLock) {
         synchronized (pInstrumentLifecycleLock) {
@@ -259,6 +282,11 @@ public final class Main {
                 }
                 try {
                     pMicrophoneInstrument.stop();
+                } catch (DeviceException pException) {
+                    LOGGER.log(System.Logger.Level.ERROR, pException.getMessage(), pException);
+                }
+                try {
+                    pJoystickInstrument.stop();
                 } catch (DeviceException pException) {
                     LOGGER.log(System.Logger.Level.ERROR, pException.getMessage(), pException);
                 }

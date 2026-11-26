@@ -137,6 +137,19 @@ class RecordingServiceTest {
     }
 
     @Test
+    void searchRecordingUsesExactNameAndDoesNotClearLoadedStateOnFailure() throws Exception {
+        repository.names.add("uno");
+        repository.recordings.put("uno", List.of(event(48)));
+
+        assertEquals(1, service.searchRecording("uno").size());
+        assertEquals("uno", service.getLoadedRecording().name());
+        assertThrows(
+                RecordingNotFoundException.class,
+                () -> service.searchRecording("dos"));
+        assertEquals("uno", service.getLoadedRecording().name());
+    }
+
+    @Test
     void discardsActiveOrPendingRecordingAndAllowsStartingAgain() throws Exception {
         service.startRecording();
         service.onSynthEvent(event(48));

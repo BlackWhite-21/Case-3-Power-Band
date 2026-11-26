@@ -7,6 +7,7 @@ import static powerband.util.IConstants.WINDOW_WIDTH;
 import javax.swing.JFrame;
 
 import powerband.service.RecordingService;
+import powerband.util.IConstants;
 
 public final class RecordingEditorFrame extends JFrame {
 
@@ -16,5 +17,10 @@ public final class RecordingEditorFrame extends JFrame {
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setContentPane(new RecordingEditorPanel(pRecordingService));
         setLocationByPlatform(true);
+    }
+
+    public void setJoystickStatus(String pStatus) {
+        RecordingEditorPanel pPanel = (RecordingEditorPanel) getContentPane();
+        pPanel.setJoystickStatus(pStatus);
     }
 }

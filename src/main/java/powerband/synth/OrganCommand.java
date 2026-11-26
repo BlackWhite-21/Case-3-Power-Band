@@ -66,8 +66,19 @@ public class OrganCommand extends SynthCommand {
 
     @Override
     protected void start(SynthEvent pEvent) throws SynthException {
-        releaseNote(pEvent.note());   // re-disparo seguro, igual que myband.sc
         float amp2 = scale(pEvent.timbre3(), ORGAN_A2_MIN, ORGAN_A2_MAX);
+        Integer pActiveNode = activeNodes.get(pEvent.note());
+        if (pActiveNode != null) {
+            getClient().setControl(pActiveNode, PARAM_AMP,
+                    scale(pEvent.velocity(), ORGAN_AMP_MIN, ORGAN_AMP_MAX));
+            getClient().setControl(pActiveNode, PARAM_R2,
+                    scale(pEvent.timbre1(), ORGAN_R2_MIN, ORGAN_R2_MAX));
+            getClient().setControl(pActiveNode, PARAM_R3,
+                    scale(pEvent.timbre2(), ORGAN_R3_MIN, ORGAN_R3_MAX));
+            getClient().setControl(pActiveNode, PARAM_A2, amp2);
+            getClient().setControl(pActiveNode, PARAM_A3, amp2 * ORGAN_A3_FACTOR);
+            return;
+        }
         int nodeId = getClient().newSynth(SYNTH_ORGAN_NAME,
                 PARAM_FREQ, midiToFreq(pEvent.note()),
                 PARAM_AMP, scale(pEvent.velocity(), ORGAN_AMP_MIN, ORGAN_AMP_MAX),

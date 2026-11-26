@@ -40,6 +40,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.Test;
@@ -131,6 +132,26 @@ class RecordingEditorPanelTest {
         assertEquals(List.of(BTN_RECORD, BTN_PAUSE_RECORDING),
                 buttonsOnPage(pComponents, IConstants.PAGE_RECORDER));
         assertEquals(IConstants.PAGE_PLAYER, pageOfButton(pComponents, BTN_STOP_PLAY));
+    }
+
+    @Test
+    void playerPageContainsExactNameSearchControl() throws Exception {
+        RecordingEditorPanel[] pPanel = new RecordingEditorPanel[1];
+        SwingUtilities.invokeAndWait(() -> pPanel[0] = createPanel());
+        List<Component> pComponents = componentsOf(pPanel[0]);
+        List<JTextField> pFields = pComponents.stream()
+                .filter(JTextField.class::isInstance)
+                .map(JTextField.class::cast)
+                .toList();
+        List<String> pButtonLabels = pComponents.stream()
+                .filter(JButton.class::isInstance)
+                .map(JButton.class::cast)
+                .map(JButton::getText)
+                .toList();
+
+        assertEquals(1, pFields.size());
+        assertEquals(IConstants.EMPTY_STRING, pFields.getFirst().getText());
+        assertTrue(pButtonLabels.contains(IConstants.BTN_SEARCH_RECORDING));
     }
 
     private RecordingEditorPanel createPanel() {

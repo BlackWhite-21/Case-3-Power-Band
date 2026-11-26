@@ -131,6 +131,7 @@ public interface IConstants {
     public static final int JOY_BASE_NOTE = 48;
     public static final int JOY_POLL_MS = 15;
     public static final float JOY_VELOCITY = 0.8f;
+    public static final String JOY_STATUS_FORMAT = "Joystick: %s";
 
     // Micrófono
     public static final String MIC_DEVICE_NAME = "Micrófono";
@@ -293,6 +294,8 @@ public interface IConstants {
     public static final String BTN_SAVE_COPY = "Guardar cambios como copia...";
     public static final String BTN_LOAD_SELECTED = "Cargar selección";
     public static final String BTN_PLAY_SELECTED = "Reproducir selección";
+    public static final String BTN_SEARCH_RECORDING = "Buscar";
+    public static final String FLD_SEARCH_RECORDING = "Nombre exacto";
     public static final String MSG_SAVE_COPY = "Nombre de la copia editada:";
     public static final String MSG_COPY_SAVED = "Copia \"%s\" guardada.";
     public static final String MSG_NO_EVENTS = "La grabación no contiene comandos.";

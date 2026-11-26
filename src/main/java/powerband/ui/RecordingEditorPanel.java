@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -42,12 +43,14 @@ public final class RecordingEditorPanel extends JPanel {
     private final JTable timelineTable;
     private final JLabel statusLabel;
     private final JLabel recordingStatusLabel;
+    private final JLabel joystickStatusLabel;
     private final JList<RecordingInfo> recordingList;
     private final javax.swing.DefaultListModel<RecordingInfo> recordingListModel;
     private final JButton recorderControlButton;
     private final JButton pauseRecordingButton;
     private final JButton stopPlaybackButton;
     private final JButton saveCopyButton;
+    private final JTextField searchNameField;
     private String loadedName;
     private boolean busy;
 
@@ -60,12 +63,16 @@ public final class RecordingEditorPanel extends JPanel {
         timelineTable = new JTable(timelineModel);
         statusLabel = new JLabel(IConstants.LBL_READY, SwingConstants.CENTER);
         recordingStatusLabel = new JLabel(IConstants.LBL_NO_RECORDING, SwingConstants.CENTER);
+        joystickStatusLabel = new JLabel(
+                String.format(IConstants.JOY_STATUS_FORMAT, IConstants.STATUS_STOPPED),
+                SwingConstants.CENTER);
         recordingListModel = new javax.swing.DefaultListModel<>();
         recordingList = new JList<>(recordingListModel);
         recorderControlButton = new JButton(IConstants.BTN_RECORD);
         pauseRecordingButton = new JButton(IConstants.BTN_PAUSE_RECORDING);
         stopPlaybackButton = new JButton(IConstants.BTN_STOP_PLAY);
         saveCopyButton = new JButton(IConstants.BTN_SAVE_COPY);
+        searchNameField = new JTextField(IConstants.EMPTY_STRING);
         loadedName = IConstants.EMPTY_STRING;
         initializeComponents();
     }
@@ -81,6 +88,7 @@ public final class RecordingEditorPanel extends JPanel {
         add(statusLabel, BorderLayout.SOUTH);
         styleLabel(statusLabel);
         styleLabel(recordingStatusLabel);
+        styleLabel(joystickStatusLabel);
         styleTable();
         recorderControlButton.addActionListener(pEvent -> toggleRecording());
         pauseRecordingButton.addActionListener(pEvent -> togglePauseRecording());
@@ -106,8 +114,14 @@ public final class RecordingEditorPanel extends JPanel {
         pNavigation.add(createNavigationButton(IConstants.TAB_RECORDER, IConstants.PAGE_RECORDER));
         pNavigation.add(createNavigationButton(IConstants.TAB_PLAYER, IConstants.PAGE_PLAYER));
         pHeader.add(pNavigation, BorderLayout.CENTER);
+        pHeader.add(joystickStatusLabel, BorderLayout.SOUTH);
 
         return pHeader;
+    }
+
+    public void setJoystickStatus(String pStatus) {
+        SwingUtilities.invokeLater(() -> joystickStatusLabel.setText(
+                String.format(IConstants.JOY_STATUS_FORMAT, pStatus)));
     }
 
     private JButton createNavigationButton(String pLabel, String pPage) {
@@ -168,6 +182,21 @@ public final class RecordingEditorPanel extends JPanel {
         styleButton(pRefreshButton);
         pRefreshButton.addActionListener(pEvent -> refreshRecordingList());
         pTop.add(pRefreshButton, BorderLayout.EAST);
+        JPanel pSearch = new JPanel(new FlowLayout(
+                FlowLayout.CENTER,
+                IConstants.UI_COMPONENT_GAP,
+                IConstants.ZERO_INT));
+        pSearch.setBackground(IConstants.UI_PANEL_COLOR);
+        JLabel pSearchLabel = new JLabel(IConstants.FLD_SEARCH_RECORDING);
+        pSearchLabel.setForeground(IConstants.UI_TEXT_COLOR);
+        searchNameField.setColumns(IConstants.NAME_LENGTH);
+        JButton pSearchButton = new JButton(IConstants.BTN_SEARCH_RECORDING);
+        styleButton(pSearchButton);
+        pSearchButton.addActionListener(pEvent -> searchRecording());
+        pSearch.add(pSearchLabel);
+        pSearch.add(searchNameField);
+        pSearch.add(pSearchButton);
+        pTop.add(pSearch, BorderLayout.SOUTH);
         pPage.add(pTop, BorderLayout.NORTH);
 
         recordingList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -365,6 +394,18 @@ public final class RecordingEditorPanel extends JPanel {
     private void loadRecording(String pName) {
         executeAsync(() -> recordingService.loadRecording(pName), pEvents -> {
             setLoadedRecording(pName, pEvents);
+            showPage(IConstants.PAGE_EDITOR);
+        }, this::showFailure);
+    }
+
+    private void searchRecording() {
+        String pName = searchNameField.getText();
+        if (pName == null || pName.isBlank()) {
+            showFailure(new powerband.exception.RecordingException(IConstants.MSG_SELECT_RECORDING));
+            return;
+        }
+        executeAsync(() -> recordingService.searchRecording(pName.strip()), pEvents -> {
+            setLoadedRecording(pName.strip(), pEvents);
             showPage(IConstants.PAGE_EDITOR);
         }, this::showFailure);
     }

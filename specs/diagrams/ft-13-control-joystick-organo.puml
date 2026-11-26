@@ -1,0 +1,32 @@
+@startuml ft-13-control-joystick-organo
+title ft-13 - Joystick USB Bridge to organ70s
+hide empty members
+
+record JoystickState {
+  x : float
+  y : float
+  z : float
+  buttons : int
+  +isPressed(pButtonIndex : int) : boolean
+}
+
+abstract class Instrument {
+  - command : SynthCommand
+  - eventListener : Consumer<SynthEvent>
+  +start()
+  +stop()
+}
+
+interface JoystickInputSource
+class WinmmJoystickInputSource
+class JoystickInstrument
+abstract class SynthCommand
+class OrganCommand
+
+Instrument <|-- JoystickInstrument
+JoystickInputSource <|.. WinmmJoystickInputSource
+JoystickInstrument --> JoystickInputSource
+JoystickInstrument --> JoystickState
+Instrument o--> SynthCommand
+SynthCommand <|-- OrganCommand
+@enduml
