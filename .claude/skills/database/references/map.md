@@ -37,6 +37,7 @@ Implements recording files, serialization, duplicate lookup, and transactional f
 - `finalizeRecording(String pName): RecordingInfo` — finalizes music, index, and list files.
 - `containsName(String pName): boolean` — checks for a name with disk binary search.
 - `findHeaderPosition(String pName): long` — returns the header offset or throws not-found.
+- Exact-name disk lookup remains a random-access binary search over fixed `INDEX_RECORD_SIZE` records; no in-memory index collection is used.
 - `listRecordings(): List<RecordingInfo>` — parses `recordings.list` without changing chronological order.
 - `loadRecording(String pName): LoadedRecording` — validates index/header agreement and returns the fixed recording boundaries.
 - `readCommands(long pStartOffset, long pEndOffset): List<SynthEvent>` — reads a bounded command buffer from `recordings.music`.

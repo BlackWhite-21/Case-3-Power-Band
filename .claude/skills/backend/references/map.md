@@ -271,6 +271,7 @@ Coordinates capture, monotonic offsets, recording names, loading, edited copies,
 - `saveRecording(String pName): RecordingInfo` — validates uniqueness and finalizes the pending recording.
 - `listRecordings(): List<RecordingInfo>` — returns recordings in chronological list-file order.
 - `loadRecording(String pName): List<SynthEvent>` — loads validated commands for one saved recording.
+- `searchRecording(String pName): List<SynthEvent>` — performs the exact-name load flow and returns the recording events.
 - `getLoadedRecording(): LoadedRecording` — returns the validated metadata for the selected recording.
 - `saveEditedCopy(String pSourceName, String pCopyName, List<SynthEvent> pEvents): RecordingInfo` — validates and saves edited commands as a separate recording.
 - `playRecording(List<SynthEvent> pEvents): CompletableFuture<Void>` — dispatches commands at their recorded offsets on a virtual thread.

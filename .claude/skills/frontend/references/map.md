@@ -17,6 +17,7 @@ Source: `src/main/java/powerband/ui`
 Three-page Swing editor with an editable timeline, page-specific recording/player controls, a stop-to-save-or-discard prompt, chronological recording selection, playback, and save-as-copy behavior. `src/main/java/powerband/ui/RecordingEditorPanel.java`
 - `RecordingEditorPanel(RecordingService pRecordingService)` — creates the editor panel for a recording service.
 - `setJoystickStatus(String pStatus): void` — displays joystick availability or failure in the header.
+- The Reproductor page includes an exact-name search field and button that call `searchRecording` asynchronously.
 
 ### RecordingEditorFrame
 Window wrapper for the recording panel. `src/main/java/powerband/ui/RecordingEditorFrame.java`

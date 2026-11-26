@@ -106,6 +106,7 @@ Binary files, search, index sorting, chronological list, and persistence-failure
 - `findsSavedRecordingAfterRepositoryIsReopened(): void` — checks persistent binary search with a new repository instance.
 - `failedListWriteDoesNotReportSuccessAndKeepsRecordingAvailableForRetry(): void` — checks rollback and retry after a list-file I/O failure.
 - `reportsMissingNamesAndRejectsBrokenMusicFile(): void` — checks not-found and I/O error reporting.
+- `binarySearchFindsExactNamesAndRejectsMissingNames(): void` — checks exact random-access disk lookup on a reopened repository.
 
 ### RecordingServiceTest
 Recording lifecycle, pause timing, name validation, edited copies, and playback tests with an in-memory repository fake. `src/test/java/powerband/service/RecordingServiceTest.java`
@@ -121,11 +122,13 @@ Recording lifecycle, pause timing, name validation, edited copies, and playback 
 - `rejectsUnorderedOrInvalidEditedEvents(): void` — checks edited-event validation.
 - `playsEventsThroughSynthRegistryAndCompletesAfterDispatch(): void` — checks timed event dispatch through a fake OSC transport.
 - `streamsLoadedRecordingThroughSynthRegistry(): void` — checks loaded recordings can play through the repository-backed playback path.
+- `searchRecordingUsesExactNameAndDoesNotClearLoadedStateOnFailure(): void` — checks exact-name search and loaded-state preservation.
 
 ### RecordingEditorPanelTest
 Headless Swing branding, page-specific control structure, and editable timeline tests. `src/test/java/powerband/ui/RecordingEditorPanelTest.java`
 - `showsTheThreeEditorPagesAndPowerBandBranding(): void` — checks page navigation labels and logo color.
 - `recordingControlsAreExclusiveToRecorderPage(): void` — checks Grabadora has only start/stop and pause/resume controls, with playback controls in Reproductor.
+- `playerPageContainsExactNameSearchControl(): void` — checks the exact-name search field and button.
 - `timelineEditsChangeOnlyTheWorkingCopy(): void` — checks editable fields and source-event immutability.
 
 ### FakeOscTransport
