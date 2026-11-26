@@ -75,6 +75,12 @@ Hook callback reference lifecycle tests with a fake Windows Pointer API. `src/te
 - `retainsCallbackUntilUnhookAndActiveCallbacksFinish(): void` — checks callback retention while hooks and callbacks are active.
 - `retainsCallbackWhenUnhookFails(): void` — checks the callback remains retained after unhook failure.
 
+### JoystickInstrumentTest
+Joystick Bridge tests with fake input and the fake organ OSC transport. `src/test/java/powerband/instrument/JoystickInstrumentTest.java`
+- `buttonPressAndReleaseDispatchOneOnAndOneOff(): void` — checks exact button transition events.
+- `axisChangesUpdateHeldButtonsWithoutExtraButtonOn(): void` — checks axis updates without retriggering a held button.
+- `failureListenerReceivesUnsupportedPlatformOrDeviceFailure(): void` — checks joystick failure reporting.
+
 ### MicrophonePitchAnalyzerTest
 PCM-to-violin pitch and velocity tests. `src/test/java/powerband/instrument/MicrophonePitchAnalyzerTest.java`
 - `mapsA4ToneAndRmsToSustainedViolinEvent(): void` — checks pitch and level conversion.

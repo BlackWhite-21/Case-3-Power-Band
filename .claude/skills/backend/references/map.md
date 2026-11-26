@@ -104,6 +104,24 @@ Normalized joystick axes and button bit mask. `src/main/java/powerband/dto/Joyst
 - `isPressed(int pButtonIndex): boolean` — checks the selected button bit.
 - Record accessors: `x(): float`, `y(): float`, `z(): float`, and `buttons(): int`.
 
+### JoystickInputSource
+Hardware boundary for opening, reading, and closing a joystick. `src/main/java/powerband/instrument/JoystickInputSource.java`
+- `open(): void` — opens the joystick or throws `DeviceException`.
+- `readState(): JoystickState` — reads normalized axes and button bits.
+- `close(): void` — releases the source.
+
+### WinmmJoystickInputSource
+Windows `winmm.dll` implementation of joystick capture. `src/main/java/powerband/instrument/WinmmJoystickInputSource.java`
+- `open(): void` — detects a Windows x64 joystick through `JOYINFOEX`.
+- `readState(): JoystickState` — normalizes X/Y/Z and returns button bits.
+- `close(): void` — stops the source.
+
+### JoystickInstrument
+Bridge abstraction that converts joystick states into sustained organ events. `src/main/java/powerband/instrument/JoystickInstrument.java`
+- `start(): void` — opens the source and starts polling.
+- `stop(): void` — stops polling, closes the source, and releases active buttons.
+- `accept(JoystickState pState): void` — dispatches ON, OFF, and axis updates.
+
 ### TabletReading
 Normalized Huion position and pressure. `src/main/java/powerband/dto/TabletReading.java`
 - Record accessors: `x(): float`, `y(): float`, and `pressure(): float`.
